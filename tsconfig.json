@@ -1,0 +1,98 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "src/**/*.spec.ts",
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ],
+  "include": [
+    "types",
+    "src",
+    "src/*",
+    "src/**/*",
+    "__tests__/*",
+    "./src/**/*.tsx",
+    "./src/**/*.ts",
+    "__tests__/App.test.tsx"
+  ],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
+    "types": [
+      "react",
+      "node"
+    ],
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
+    "skipLibCheck": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsx": "react",
+    "lib": [
+      "es6"
+    ],
+    "moduleResolution": "node16",
+    "module": "Node16",
+    "noEmit": true,
+    "strict": true,
+    "target": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "@*": [
+        "src/*"
+      ],
+      "*": [
+        "src/*"
+      ],
+      "tests": [
+        "__tests__/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@redux/*": [
+        "src/redux/*"
+      ],
+      "@services/*": [
+        "src/services/*"
+      ],
+      "@screens/*": [
+        "src/screens/*"
+      ],
+      "@navigation/*": [
+        "./src/navigation/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@hooks/*": [
+        "src/hooks/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
+      ],
+      "@testing/*": [
+        "src/tests/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@splashscreen/*": [
+        "src/splashscreen/*"
+      ],
+    }
+  }
+}
