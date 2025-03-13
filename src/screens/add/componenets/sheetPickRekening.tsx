@@ -1,3 +1,4 @@
+import { formatThousand } from "@components/formatRibuan"
 import { IconCustom } from "@components/iconCustom"
 import { TextHeading } from "@components/textHeading"
 import { Switch, Text, Actionsheet, ActionsheetBackdrop, ActionsheetContent, ActionsheetDragIndicatorWrapper, ActionsheetDragIndicator, HStack, ActionsheetScrollView, VStack, Box, Divider } from "@gluestack-ui/themed"
@@ -39,7 +40,7 @@ const SheetPickRekening: React.FC<SheetRekeneingInterface> = ({ showActionsheet,
                                         </Box>
                                         <Text>Ilham</Text>
                                     </HStack>
-                                    <Text>1.290.000</Text>
+                                    <Text>{formatThousand(1000000)}</Text>
                                 </HStack>
                             </Box>
                             <Divider my="$0.5" />

@@ -1,3 +1,4 @@
+import { formatThousand } from "@components/formatRibuan"
 import { IconCustom } from "@components/iconCustom"
 import { InputDefault } from "@components/input/inputDefault"
 import { View, Text, VStack, HStack, Box } from "@gluestack-ui/themed"
@@ -21,19 +22,19 @@ const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, han
     const handlePress = (value: string) => {
         if (value === "=") {
             try {
-                const result = eval(input); // Hasil evaluasi
-                setInput(result.toString()); // Pastikan hasil jadi string
+                const result = eval(input);
+                setInput(result.toString());
             } catch (error) {
                 setInput("Error");
             }
         } else if (value === "AC") {
-            setInput(""); // Menghapus seluruh input
+            setInput("");
         } else if (value === "DEL") {
-            setInput((prev) => (typeof prev === "string" ? prev.slice(0, -1) : "")); // Menghapus 1 karakter terakhir
+            setInput((prev) => (typeof prev === "string" ? prev.slice(0, -1) : ""));
         } else if (value === "today") {
-            setShowModal(true); // Membuka modal
+            setShowModal(true);
         } else {
-            setInput((prev) => (typeof prev === "string" ? prev + value : value)); // Tambah karakter
+            setInput((prev) => (typeof prev === "string" ? prev + value : value));
         }
     };
 
@@ -53,7 +54,7 @@ const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, han
                             <IconCustom As={Ionicons} name="wallet-outline" size={20} />
                         </Box>
                     </TouchableOpacity>
-                    <Text color="black" size="lg">{input || "0"}</Text>
+                    <Text color="black" size="lg">{formatThousand(input) || "0"}</Text>
                 </HStack>
                 <Box padding={6} borderRadius={10} bgColor="white" >
                     <HStack justifyContent="space-between" alignItems="center" marginHorizontal={10}>
@@ -82,13 +83,17 @@ const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, han
                                             backgroundColor: "#ddd",
                                             alignItems: 'center',
                                             padding: 10,
-                                            width: '20%',
+                                            justifyContent: 'center',
+                                            width: '22%',
                                             borderRadius: 10
                                         }}
                                         onPress={() => handlePress(button)}
                                     >
                                         {button === "today" ? (
-                                            <IconCustom name="calendar-clear" size={20} color="#eab308" As={Ionicons} />
+                                            <HStack space="xs">
+                                                <IconCustom name="calendar" size={14} color="#eab308" As={Ionicons} />
+                                                <Text size="xs" color="#eab308">Hari ini</Text>
+                                            </HStack>
                                         ) : (
                                             <Text>{button}</Text>
                                         )}

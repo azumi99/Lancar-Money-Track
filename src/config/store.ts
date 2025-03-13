@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CurrencyItemInterface } from '@screens/profile/detailPengaturan/pengaturanCurrency/currencyScreen';
+import { KategoriInterface } from '@screens/profile/detailPengaturan/pengaturanKategori/modelKategori';
+import { RekeningInterface } from '@screens/profile/detailPengaturan/pengaturanRekening/modelRekening';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -202,6 +205,96 @@ const DateCalenderDetail = create<DateCalenderInterface>()(set => ({
   titleDate: '',
   setTitleDate: (value: string) => set({ titleDate: value }),
 }));
+interface SaveKategoriInterface {
+  saveKategori: boolean;
+  setSaveKategori: (value: boolean) => void;
+}
+const SaveKategori = create<SaveKategoriInterface>()(set => ({
+  saveKategori: false,
+  setSaveKategori: (value: boolean) => set({ saveKategori: value }),
+}));
+
+interface KategoriState {
+  kategori: KategoriInterface[];
+  setKategori: (newData: KategoriInterface[]) => void;
+}
+
+const useKategoriStorePemasukan = create<KategoriState>()(
+  persist(
+    set => ({
+      kategori: [],
+      setKategori: (newData) => set({ kategori: newData }),
+    }),
+    {
+      name: 'kategori-storage-pemasukan',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+const useKategoriStorePengeluaran = create<KategoriState>()(
+  persist(
+    set => ({
+      kategori: [],
+      setKategori: (newData) => set({ kategori: newData }),
+    }),
+    {
+      name: 'kategori-storage-pengeluaran',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+interface RekeningState {
+  rekening: RekeningInterface[];
+  setRekening: (newData: RekeningInterface[]) => void;
+}
+const useRekeningData = create<RekeningState>()(
+  persist(
+    set => ({
+      rekening: [],
+      setRekening: (newData) => set({ rekening: newData }),
+    }),
+    {
+      name: 'rekening-data',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+
+interface hookRekeningInterface {
+  saveRekening: boolean;
+  setSaveRekening: (value: boolean) => void;
+}
+const useHockRekening = create<hookRekeningInterface>()(set => ({
+  saveRekening: false,
+  setSaveRekening: (value: boolean) => set({ saveRekening: value }),
+}));
+
+interface CurrencyState {
+  currency: CurrencyItemInterface[];
+  setCurrency: (newData: CurrencyItemInterface[]) => void;
+}
+const useCurrency = create<CurrencyState>()(
+  persist(
+    set => ({
+      currency: [],
+      setCurrency: (newData) => set({ currency: newData }),
+    }),
+    {
+      name: 'currency-data',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+
+interface searchCurrencyInterface {
+  currencySearch: boolean;
+  setCurrencySearch: (value: boolean) => void;
+}
+const useCurrencySearch = create<searchCurrencyInterface>()(set => ({
+  currencySearch: false,
+  setCurrencySearch: (value: boolean) => set({ currencySearch: value }),
+}));
+
 export {
   TokenJwt,
   UserStore,
@@ -218,5 +311,12 @@ export {
   DefaultDate,
   ModalDate,
   PadStore,
-  DateCalenderDetail
+  DateCalenderDetail,
+  SaveKategori,
+  useKategoriStorePemasukan,
+  useKategoriStorePengeluaran,
+  useRekeningData,
+  useCurrency,
+  useCurrencySearch,
+  useHockRekening
 };

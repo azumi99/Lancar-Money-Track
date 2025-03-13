@@ -201,7 +201,6 @@ const CalendarScreen = () => {
                 onPress={() => navigation.navigate('StackNav', { screen: 'AddScreen', params: { name: true } })}
             >
                 <FabIcon as={AddIcon} />
-
             </Fab>
         </SafeAreaCustom >
     )

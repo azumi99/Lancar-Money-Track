@@ -13,6 +13,7 @@ import { SheetSelectMedia } from "@screens/add/componenets/sheetSelectMedia";
 import { SheetManageImage } from "@screens/add/componenets/sheetManageImage";
 import { PadFormAdd } from "./componenets/padFormAdd";
 import { useFocusEffect } from "@react-navigation/native";
+import { View } from "@gluestack-ui/themed";
 
 
 const renderScene = SceneMap({

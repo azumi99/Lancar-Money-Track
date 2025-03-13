@@ -4,10 +4,19 @@ import { TabNav } from '@navigation/tabNav';
 import { StackNavigation } from '@navigation/stackNav';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { CreateTableKategori } from '@screens/profile/detailPengaturan/pengaturanKategori/modelKategori';
+import { CreateTableCatatan } from '@screens/catatan/models/crudCatatan';
+import { CreateTableRekening } from '@screens/profile/detailPengaturan/pengaturanRekening/modelRekening';
 
 
 const NavigatorScreen = () => {
   const Stack = createStackNavigator();
+
+  useEffect(() => {
+    CreateTableKategori();
+    CreateTableCatatan();
+    CreateTableRekening();
+  }, [])
 
   return (
     <NavigationContainer>

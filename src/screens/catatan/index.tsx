@@ -91,7 +91,6 @@ const CatatanScreen = () => {
     }, []);
     const fetchData = async () => {
         try {
-            await CreateTableCatatan();
             const response = await GetCatatan();
             setData(response);
         } catch (error) {

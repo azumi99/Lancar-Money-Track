@@ -20,5 +20,20 @@ async function getCurrencyRates(base = "IDR", symbols = "USD,EUR,GBP,IDR") {
     }
 }
 
+async function getListCurrency() {
+    try {
+        const response = await axios.get(`${API_URL}/currencies`, {
+            params: {
+                type: 'fiat',
+                api_key: API_KEY,
+            },
+        });
+        // console.log("Currency Data:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching currency data:", error);
+    }
+}
 
-export { getCurrencyRates }
+
+export { getCurrencyRates, getListCurrency }

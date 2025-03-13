@@ -80,4 +80,5 @@ const GetLastId = async () => {
 };
 
 
+
 export { CreateTableCatatan, AddCatatan, GetCatatan, GetLastId }

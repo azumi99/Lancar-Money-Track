@@ -58,12 +58,15 @@ const TabNav = () => {
     </VStack>
   );
   const iconAdd = (color: string, focused: boolean) => (
-    <VStack space="xs" style={{ justifyContent: 'center', alignItems: 'center' }} bgColor='$yellow300' padding={15} borderRadius={50} mt={-40}  >
-      <Ionicons
-        size={30}
-        name={'add-outline'}
-      />
-    </VStack>
+    <View justifyContent='center' alignItems='center' bgColor='white' padding={3} borderRadius={50} mt={-40} borderWidth={0.5} borderColor='$secondary200' softShadow='1'>
+      <View bgColor='$yellow300' borderRadius={50} padding={10}   >
+        <Ionicons
+          size={30}
+          name={'add-outline'}
+
+        />
+      </View>
+    </View>
 
   );
 

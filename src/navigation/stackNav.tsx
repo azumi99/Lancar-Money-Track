@@ -15,7 +15,10 @@ import {
   MessageStore,
   ModalDate,
   NotifStore,
+  SaveKategori,
   navigateIdRequestStore,
+  useCurrencySearch,
+  useHockRekening,
 } from '@config/store';
 
 import { HStack, Text } from '@gluestack-ui/themed';
@@ -25,6 +28,12 @@ import { CalendarScreen } from '@screens/calendar';
 import { TextHeading } from '@components/textHeading';
 import { DetailCalendar } from '@screens/calendar/detailCalender';
 import { AddScreen } from '@screens/add';
+import { PengaturanScreen } from '@screens/profile/pengaturanScreen';
+import { KategoriSettings } from '@screens/profile/detailPengaturan/pengaturanKategori/kategoriSettings';
+import { AddKategori } from '@screens/profile/detailPengaturan/pengaturanKategori/AddKategori';
+import { RekeningScreen } from '@screens/profile/detailPengaturan/pengaturanRekening/rekeningScreen';
+import { AddRekeningScreen } from '@screens/profile/detailPengaturan/pengaturanRekening/addRekening';
+import { CurrencyScreen } from '@screens/profile/detailPengaturan/pengaturanCurrency/currencyScreen';
 const Stack = createNativeStackNavigator();
 export const StackNavigation = ({ route }) => {
   const navigation = useNavigation<any>();
@@ -34,12 +43,15 @@ export const StackNavigation = ({ route }) => {
   const { setParam } = EditProfileStore();
   const { setChange } = ChangePasswordStore();
   const { setIdNav } = navigateIdRequestStore();
+  const { setSaveKategori } = SaveKategori();
+  const { setSaveRekening } = useHockRekening();
   const { mode } = DarkModeStore();
   const { setAdd } = AddAccountStore();
   const { setMessageData } = MessageStore();
   const { setNotif } = NotifStore();
   const { date } = DefaultDate();
   const { setModalDate } = ModalDate()
+  const { currencySearch, setCurrencySearch } = useCurrencySearch();
   // console.log(route.params.params.title)
 
   return (
@@ -174,6 +186,117 @@ export const StackNavigation = ({ route }) => {
               <IconCustom As={Ionicons} name="calendar" size={20} />
             </TouchableOpacity>
           ),
+        }}
+      />
+      <Stack.Screen
+        name="PengaturanScreen"
+        component={PengaturanScreen}
+        options={{
+          title: 'Pengaturan',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+
+          headerLeft: () => (
+            !route.params.params?.back &&
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+        }}
+      />
+      <Stack.Screen
+        name="KategoriSettings"
+        component={KategoriSettings}
+        options={{
+          title: 'Pengaturan Kategori',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+
+
+        }}
+      />
+      <Stack.Screen
+        name="AddKategori"
+        component={AddKategori}
+        options={{
+          title: 'Tambah Kategori',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+
+          headerRight: () => (
+            <TouchableOpacity onPress={() => setSaveKategori(true)}>
+              <IconCustom As={Ionicons} name="checkmark-sharp" size={20} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="RekeningScreen"
+        component={RekeningScreen}
+        options={{
+          title: 'Rekening',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+
+
+        }}
+      />
+      <Stack.Screen
+        name="AddRekeningScreen"
+        component={AddRekeningScreen}
+        options={{
+          title: 'Tambahkan',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerRight: () => (
+            <TouchableOpacity onPress={() => setSaveRekening(true)}>
+              <IconCustom As={Ionicons} name="checkmark-sharp" size={20} />
+            </TouchableOpacity>
+          ),
+
+
+        }}
+      />
+      <Stack.Screen
+        name="CurrencyScreen"
+        component={CurrencyScreen}
+        options={{
+          title: 'Currency',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerRight: () => (
+            <TouchableOpacity onPress={() => setCurrencySearch(!currencySearch)} >
+              <IconCustom As={Ionicons} name="search" size={20} />
+            </TouchableOpacity>
+          ),
+
+
         }}
       />
     </Stack.Navigator>

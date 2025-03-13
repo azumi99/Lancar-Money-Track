@@ -7,6 +7,7 @@ import { IconCustom } from "@components/iconCustom"
 import { CurrencyFormatter } from "@components/curencyComponent"
 import { TouchableOpacity } from "react-native"
 import { ModalCustom } from "@components/modalComponent"
+import { DeleteConfirm } from "@components/modalConfirm/deleteConfirm"
 
 const CatatanDetail = ({ route }) => {
     const [showAlertDialog, setShowAlertDialog] = React.useState(false)
@@ -14,6 +15,8 @@ const CatatanDetail = ({ route }) => {
     const amount = route.params.data.jumlah !== undefined && route.params.data.jumlah !== null
         ? (route.params.data.jenis === 'Pengeluaran' ? -route.params.data.jumlah : route.params.data.jumlah)
         : 0;
+
+    console.log('route', route)
     return (
         <SafeAreaCustom>
             <ScrollView paddingHorizontal={16} marginVertical={20} showsVerticalScrollIndicator={false}>
@@ -65,19 +68,7 @@ const CatatanDetail = ({ route }) => {
                     </TouchableOpacity>
                 </HStack>
             </View>
-            <ModalCustom showModal={showAlertDialog} setShowModal={setShowAlertDialog}>
-                <VStack space="xl" alignSelf="center" mt={17}>
-                    <Text size="lg" color="red" textAlign="center">Apakah anda yakin untuk menghapus?</Text>
-                    <HStack space="4xl">
-                        <TouchableOpacity onPress={() => setShowAlertDialog(false)} style={{ padding: 5, paddingHorizontal: 15 }}>
-                            <TextHeading>Batalkan</TextHeading>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ padding: 5, paddingHorizontal: 15 }}>
-                            <TextHeading>Konfirmasi</TextHeading>
-                        </TouchableOpacity>
-                    </HStack>
-                </VStack>
-            </ModalCustom>
+            <DeleteConfirm showAlertDialog={showAlertDialog} setShowAlertDialog={setShowAlertDialog} title={"Apakah anda yakin akan menghapus?"} />
         </SafeAreaCustom>
     )
 }

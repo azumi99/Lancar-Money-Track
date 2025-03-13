@@ -1,30 +1,25 @@
-import React from 'react';
+import React from "react";
 import {
   AlertCircleIcon,
-  CalendarDaysIcon,
   FormControl,
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
-  FormControlHelper,
-  FormControlHelperText,
   FormControlLabel,
   FormControlLabelText,
   Input,
   InputField,
-  InputIcon,
   InputSlot,
-} from '@gluestack-ui/themed';
-import { DimensionValue, KeyboardTypeOptions } from 'react-native';
+} from "@gluestack-ui/themed";
+import { DimensionValue, KeyboardTypeOptions } from "react-native";
 
 type Props = {
   label?: string;
   placeHolder?: string;
-  variant?: 'rounded' | 'outline' | 'underlined' | undefined;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | undefined;
+  variant?: "rounded" | "outline" | "underlined";
+  size?: "sm" | "md" | "lg" | "xl";
   changeText: (value: string) => void;
-  fieldInput?: KeyboardTypeOptions | undefined;
-  typeInput?: 'password' | 'text' | undefined;
+  fieldInput?: KeyboardTypeOptions;
   bgColor?: string;
   onFocus?: () => void;
   value?: string;
@@ -33,13 +28,20 @@ type Props = {
   iconElement?: JSX.Element | JSX.Element[];
   softOnFocus?: boolean;
   testID?: string;
-  messageFail?: string;
   isValid?: boolean;
   borderColor?: string;
   messageError?: string;
   defaultValue?: string;
   width?: DimensionValue;
+  autoFocus?: boolean;
 };
+
+export const formatThousand = (value: string): string => {
+  return value
+    .replace(/\D/g, "") // Hapus karakter selain angka
+    .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Format ribuan
+};
+
 const InputDefault: React.FC<Props> = ({
   label,
   placeHolder,
@@ -47,7 +49,6 @@ const InputDefault: React.FC<Props> = ({
   size,
   changeText,
   fieldInput,
-  typeInput,
   bgColor,
   onFocus,
   value,
@@ -56,13 +57,22 @@ const InputDefault: React.FC<Props> = ({
   iconElement,
   softOnFocus,
   testID,
-  messageFail,
   isValid,
-  borderColor = '#d6d3d1',
+  borderColor = "#d6d3d1",
   messageError,
   defaultValue,
   width,
+  autoFocus,
 }) => {
+  const handleChange = (input: string) => {
+    if (fieldInput === "numeric") {
+      const numericValue = input.replace(/\D/g, ""); // Hanya angka
+      changeText(numericValue);
+    } else {
+      changeText(input); // Jika bukan angka, langsung set teks
+    }
+  };
+
   return (
     <FormControl isInvalid={isValid} width={width}>
       {label && (
@@ -71,35 +81,25 @@ const InputDefault: React.FC<Props> = ({
         </FormControlLabel>
       )}
 
-      <Input
-        variant={variant}
-        size={size}
-        borderRadius={10}
-        isDisabled={isDisabled}
-        borderColor={borderColor}>
-        {showIcon && (
-          <InputSlot alignItems="center" width={'10%'}>
-            {iconElement}
-          </InputSlot>
-        )}
-
+      <Input variant={variant} size={size} borderRadius={10} isDisabled={isDisabled} borderColor={borderColor}>
+        {showIcon && <InputSlot alignItems="center" width={"10%"}>{iconElement}</InputSlot>}
         <InputField
           defaultValue={defaultValue}
           placeholder={placeHolder}
-          onChangeText={value => changeText(value)}
-          value={value}
+          onChangeText={handleChange}
+          value={fieldInput === "numeric" ? formatThousand(value ?? "") : value}
           keyboardType={fieldInput}
           backgroundColor={bgColor}
           onFocus={onFocus}
           showSoftInputOnFocus={softOnFocus}
           testID={testID}
+          autoFocus={autoFocus}
         />
       </Input>
+
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />
-        <FormControlErrorText>
-          {messageError === '' ? 'Invalid email input' : messageError}
-        </FormControlErrorText>
+        <FormControlErrorText>{messageError || "Invalid input"}</FormControlErrorText>
       </FormControlError>
     </FormControl>
   );
