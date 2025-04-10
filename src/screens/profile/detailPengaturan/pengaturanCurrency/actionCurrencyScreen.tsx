@@ -48,6 +48,7 @@ const ActionCurrencyScreen: React.FC<ActionInterface> = ({ handleClose, showActi
         item.short_code.toLowerCase().includes(search.toLowerCase())
     );
 
+
     return (
         <Actionsheet isOpen={showActionsheet} onClose={handleClose} zIndex={999}>
             <ActionsheetBackdrop />
@@ -101,10 +102,13 @@ const ActionCurrencyScreen: React.FC<ActionInterface> = ({ handleClose, showActi
                     {filteredCurrency.length > 0 ? (
                         filteredCurrency.map((item, index) => (
                             <ActionsheetItem onPress={() => { setMataUang(item.short_code); handleClose() }} key={index} justifyContent="space-between">
-                                <HStack space="xs">
-                                    <Text size="sm">{item.name}</Text>
-                                    <Text size="sm">({item.short_code})</Text>
-                                </HStack>
+                                <VStack>
+                                    <HStack space="xs">
+                                        <Text size="sm">{item.name} {item.short_code}</Text>
+                                        <Text size="sm">({item.symbol})</Text>
+                                    </HStack>
+                                    <Text size="xs">1 {item.short_code} = {(1 / item.value_convert).toLocaleString("id-ID", { maximumFractionDigits: 2 })}</Text>
+                                </VStack>
 
                                 <RadioGroup value={matauang} onChange={() => { setMataUang(item.short_code); handleClose() }}>
                                     <Radio value={item.short_code} size="md"  >

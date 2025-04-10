@@ -272,6 +272,7 @@ const useHockRekening = create<hookRekeningInterface>()(set => ({
 interface CurrencyState {
   currency: CurrencyItemInterface[];
   setCurrency: (newData: CurrencyItemInterface[]) => void;
+
 }
 const useCurrency = create<CurrencyState>()(
   persist(
@@ -285,6 +286,17 @@ const useCurrency = create<CurrencyState>()(
     }
   )
 );
+interface HookInterfaceCurrency {
+  selectedCurrency: string;
+  setSelectedCurrency: (newData: string) => void;
+}
+
+const useHookDataCurrency = create<HookInterfaceCurrency>()(
+  set => ({
+    selectedCurrency: "",
+    setSelectedCurrency: (newData) => set({ selectedCurrency: newData }),
+  })
+);
 
 interface searchCurrencyInterface {
   currencySearch: boolean;
@@ -294,6 +306,54 @@ const useCurrencySearch = create<searchCurrencyInterface>()(set => ({
   currencySearch: false,
   setCurrencySearch: (value: boolean) => set({ currencySearch: value }),
 }));
+
+interface actionInterfaceCurrency {
+  handleOpen: boolean;
+  setHandleOpen: (value: boolean) => void;
+}
+const useHookActionCurrency = create<actionInterfaceCurrency>()(set => ({
+  handleOpen: false,
+  setHandleOpen: (value: boolean) => set({ handleOpen: value }),
+}));
+
+interface InterfaceDefaultOpenRek {
+  defaultHandle: boolean;
+  setHandleDefault: (value: boolean) => void;
+
+}
+const useDefaultOpenRek = create<InterfaceDefaultOpenRek>()(set => ({
+  defaultHandle: false,
+  setHandleDefault: (value: boolean) => set({ defaultHandle: value }),
+}));
+
+interface interfaceSelectKategori {
+  selectedIndex: string;
+  setSelectedIndex: (value: string) => void;
+
+}
+const useSelectedKategori = create<interfaceSelectKategori>()(set => ({
+  selectedIndex: '',
+  setSelectedIndex: (value: string) => set({ selectedIndex: value }),
+}));
+
+
+type RekeningTransferStore = {
+  selectedRekeningFrom: number | undefined;
+  selectedRekeningTo: number | undefined;
+  setSelectedRekeningFrom: (value: number | undefined) => void;
+  setSelectedRekeningTo: (value: number | undefined) => void;
+  resetRekeningTransfer: () => void;
+};
+
+const useRekeningTransferStore = create<RekeningTransferStore>((set) => ({
+  selectedRekeningFrom: undefined,
+  selectedRekeningTo: undefined,
+  setSelectedRekeningFrom: (value) => set({ selectedRekeningFrom: value }),
+  setSelectedRekeningTo: (value) => set({ selectedRekeningTo: value }),
+  resetRekeningTransfer: () => set({ selectedRekeningFrom: undefined, selectedRekeningTo: undefined }),
+}));
+
+
 
 export {
   TokenJwt,
@@ -318,5 +378,10 @@ export {
   useRekeningData,
   useCurrency,
   useCurrencySearch,
-  useHockRekening
+  useHookActionCurrency,
+  useHockRekening,
+  useDefaultOpenRek,
+  useHookDataCurrency,
+  useSelectedKategori,
+  useRekeningTransferStore
 };

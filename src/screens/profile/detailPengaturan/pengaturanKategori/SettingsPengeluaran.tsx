@@ -29,8 +29,9 @@ const SettingsPengeluaran = () => {
 
 
     const handleDelete = async () => {
+        const findKategori = kategori.find((cat) => cat.key === keyDel);
         try {
-            await DeleteKategori(keyDel);
+            await DeleteKategori(keyDel, findKategori?.active == '0' ? 1 : 0);
             fetchPengeluaran({ kategori, setKategori });
             setShowAlertDialog(false);
         } catch (error) {
@@ -47,7 +48,7 @@ const SettingsPengeluaran = () => {
     return (
         <>
             <DraggableFlatList
-                data={kategori}
+                data={[...kategori].sort((a, b) => parseInt(b.active, 10) - parseInt(a.active, 10))}
                 onDragEnd={({ data }) => setKategori(data)}
                 keyExtractor={(item) => item.key}
                 renderItem={({ item, drag, isActive }: RenderItemParams<typeof kategori[0]>) => (
@@ -57,7 +58,7 @@ const SettingsPengeluaran = () => {
                                 <HStack alignItems="center" justifyContent="space-between">
                                     <HStack alignItems="center" space="md">
                                         <TouchableOpacity onPress={() => { setKeyDel(item.key); setShowAlertDialog(true) }}>
-                                            <IconCustom As={Entypo} name="circle-with-minus" size={27} color="red" />
+                                            <IconCustom As={Entypo} name={item.active == '1' ? "circle-with-minus" : "plus"} size={27} color={item.active == '1' ? "red" : "green"} />
                                         </TouchableOpacity>
                                         <IconCustom As={Ionicons} name={item.kategoriIcon} size={27} color="#fde047" />
                                         <Text>{item.title}</Text>
@@ -69,6 +70,7 @@ const SettingsPengeluaran = () => {
                     </ScaleDecorator>
                 )}
             />
+
             <Fab
                 size="lg"
                 placement="bottom right"

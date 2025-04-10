@@ -66,10 +66,10 @@ const InputDefault: React.FC<Props> = ({
 }) => {
   const handleChange = (input: string) => {
     if (fieldInput === "numeric") {
-      const numericValue = input.replace(/\D/g, ""); // Hanya angka
+      const numericValue = input.replace(/\D/g, "");
       changeText(numericValue);
     } else {
-      changeText(input); // Jika bukan angka, langsung set teks
+      changeText(input);
     }
   };
 
@@ -81,7 +81,7 @@ const InputDefault: React.FC<Props> = ({
         </FormControlLabel>
       )}
 
-      <Input variant={variant} size={size} borderRadius={10} isDisabled={isDisabled} borderColor={borderColor}>
+      <Input variant={variant} size={size} borderRadius={10} isDisabled={isDisabled} borderColor={borderColor} backgroundColor={bgColor}>
         {showIcon && <InputSlot alignItems="center" width={"10%"}>{iconElement}</InputSlot>}
         <InputField
           defaultValue={defaultValue}
@@ -89,7 +89,6 @@ const InputDefault: React.FC<Props> = ({
           onChangeText={handleChange}
           value={fieldInput === "numeric" ? formatThousand(value ?? "") : value}
           keyboardType={fieldInput}
-          backgroundColor={bgColor}
           onFocus={onFocus}
           showSoftInputOnFocus={softOnFocus}
           testID={testID}

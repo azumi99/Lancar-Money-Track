@@ -66,23 +66,16 @@ const UpdateKategori = (key, title, kategoriIcon, vendor, active, keterangan) =>
 };
 
 
-const DeleteKategori = (key) => {
+const DeleteKategori = (key, active) => {
     db.transaction(tx => {
         tx.executeSql(
-            `DELETE FROM kategori WHERE key = ?`,
-            [key],
+            `UPDATE kategori SET active = ? WHERE key = ?`,
+            [active, key],
             (_, result) => {
-                if (result.rowsAffected > 0) {
-                    console.log(`Data dengan key ${key} berhasil dihapus.`);
-                    ShowToast(`Data berhasil dihapus`);
-                } else {
-                    console.log(`Tidak ada data dengan key ${key}.`);
-                    ShowToast(`Tidak ada data`);
-                }
+                console.log('Status active berhasil diperbarui:', result.rowsAffected);
             },
             error => {
-                console.error(`Error menghapus data dengan key ${key}:`, error);
-                ShowToast(`Error menghapus data}`);
+                console.error('Error memperbarui status active:', error);
             }
         );
     });
@@ -108,6 +101,26 @@ const GetKategori = (ket): Promise<KategoriInterface[]> => {
         });
     });
 };
+
+const GetKategoriByKey = (key: string): Promise<KategoriInterface | null> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `SELECT * FROM kategori WHERE key = ? LIMIT 1`,
+                [key],
+                (_, result) => {
+                    const data = result.rows.length > 0 ? result.rows.item(0) : null;
+                    resolve(data as KategoriInterface | null);
+                },
+                error => {
+                    console.error('Error membaca data berdasarkan key:', error);
+                    reject(error);
+                }
+            );
+        });
+    });
+};
+
 
 const IdKategori = async (): Promise<number> => {
     return new Promise((resolve, reject) => {
@@ -195,4 +208,4 @@ const handleAddHarcodeKategoriPemasukan = async () => {
         console.error("Error saat menambahkan data:", error);
     }
 };
-export { UpdateKategori, DeleteKategori, CreateTableKategori, GetKategori, InsertKategori, IdKategori, handleAddHarcodeKategori, handleAddHarcodeKategoriPemasukan }
+export { UpdateKategori, DeleteKategori, CreateTableKategori, GetKategori, InsertKategori, IdKategori, handleAddHarcodeKategori, handleAddHarcodeKategoriPemasukan, GetKategoriByKey }

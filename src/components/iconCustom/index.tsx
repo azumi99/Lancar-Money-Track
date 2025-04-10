@@ -1,12 +1,12 @@
 import { useColorMode } from '@gluestack-ui/themed';
 import React from 'react';
-import { ViewStyle } from 'react-native';
+import { ColorValue, ViewStyle } from 'react-native';
 
 type Props = {
   As: React.ComponentType<any>;
   name?: string;
   size?: number;
-  color?: string;
+  color?: ColorValue | undefined;
   style?: ViewStyle;
 };
 

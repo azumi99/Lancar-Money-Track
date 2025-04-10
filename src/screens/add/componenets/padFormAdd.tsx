@@ -15,17 +15,25 @@ interface FormAddInterface {
     setCatatan: (value: string) => void;
     setInput: (value: string | ((prev: string) => string)) => void;
     setShowModal: (value: boolean | ((prev: boolean) => boolean)) => void;
+    funcSave: () => void;
+    catatan: string;
+    date?: string;
+    showRekening?: boolean;
 
 }
 
-const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, handleImage, input, images, setCatatan, setInput, setShowModal }) => {
+const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, handleImage, input, images, setCatatan, setInput, setShowModal, funcSave, catatan, date, showRekening }) => {
     const handlePress = (value: string) => {
         if (value === "=") {
-            try {
-                const result = eval(input);
-                setInput(result.toString());
-            } catch (error) {
-                setInput("Error");
+            if (input === "" || input === "0") {
+                setInput("0");
+            } else {
+                try {
+                    const result = eval(input);
+                    setInput(result.toString());
+                } catch (error) {
+                    setInput("Error");
+                }
             }
         } else if (value === "AC") {
             setInput("");
@@ -33,34 +41,49 @@ const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, han
             setInput((prev) => (typeof prev === "string" ? prev.slice(0, -1) : ""));
         } else if (value === "today") {
             setShowModal(true);
+        } else if (value === "save") {
+            funcSave();
         } else {
-            setInput((prev) => (typeof prev === "string" ? prev + value : value));
+            setInput((prev) => {
+                if (typeof prev !== "string") return value;
+                const lastChar = prev.slice(-1);
+                if ((value === "+" || value === "-") && (lastChar === "+" || lastChar === "-")) {
+                    return prev;
+                }
+                return prev + value;
+            });
         }
     };
 
-    const buttons = [
-        ["AC", "DEL", "today", "+"],
-        ["1", "2", "3", "-"],
-        ["4", "5", "6", "="],
-        ["7", "8", "9", "0"],
 
+    const buttons = [
+        ["AC", "DEL", "today", "+-"],
+        ["1", "2", "3", "="],
+        ["4", "5", "6", "save"],
+        ["7", "8", "9", "0"]
     ];
+
     return (
         <View height={'52%'} bgColor="$secondary100">
             <VStack paddingHorizontal={16} paddingVertical={16} space="md">
                 <HStack justifyContent="space-between" alignItems="center">
-                    <TouchableOpacity onPress={handleClose}>
-                        <Box padding={6} bgColor="$secondary200" borderRadius={10}>
-                            <IconCustom As={Ionicons} name="wallet-outline" size={20} />
-                        </Box>
-                    </TouchableOpacity>
+                    <View>
+                        {showRekening &&
+                            <TouchableOpacity onPress={handleClose}>
+                                <Box padding={6} bgColor="$secondary200" borderRadius={10}>
+                                    <IconCustom As={Ionicons} name="wallet-outline" size={20} />
+                                </Box>
+                            </TouchableOpacity>
+                        }
+
+                    </View>
                     <Text color="black" size="lg">{formatThousand(input) || "0"}</Text>
                 </HStack>
                 <Box padding={6} borderRadius={10} bgColor="white" >
                     <HStack justifyContent="space-between" alignItems="center" marginHorizontal={10}>
                         <HStack alignItems="center">
                             <Text size="xs">Catatan: </Text>
-                            <InputDefault changeText={(text) => setCatatan(text)} variant="outline" width={'77%'} borderColor="transparent" />
+                            <InputDefault value={catatan} changeText={(text) => setCatatan(text)} variant="outline" width={'77%'} borderColor="transparent" />
                         </HStack>
 
                         <TouchableOpacity onPress={images.length > 0 ? handleImage : handleCamera}>
@@ -71,39 +94,92 @@ const PadFormAdd: React.FC<FormAddInterface> = ({ handleClose, handleCamera, han
                         </TouchableOpacity>
                     </HStack>
                 </Box>
-                <View >
+                <View>
                     <VStack space="md">
                         {buttons.map((row, rowIndex) => (
                             <HStack key={rowIndex} justifyContent="space-around">
-
                                 {row.map((button) => (
-                                    <TouchableOpacity
-                                        key={button}
-                                        style={{
+                                    button === "+-" ? (
+                                        <View key={button} style={{
                                             backgroundColor: "#ddd",
+                                            flexDirection: 'row',
                                             alignItems: 'center',
-                                            padding: 10,
                                             justifyContent: 'center',
                                             width: '22%',
-                                            borderRadius: 10
-                                        }}
-                                        onPress={() => handlePress(button)}
-                                    >
-                                        {button === "today" ? (
-                                            <HStack space="xs">
-                                                <IconCustom name="calendar" size={14} color="#eab308" As={Ionicons} />
-                                                <Text size="xs" color="#eab308">Hari ini</Text>
-                                            </HStack>
-                                        ) : (
-                                            <Text>{button}</Text>
-                                        )}
+                                            borderRadius: 10,
+                                            overflow: 'hidden'
+                                        }}>
+                                            <TouchableOpacity
+                                                style={{
+                                                    flex: 1,
+                                                    alignItems: 'center',
+                                                    paddingVertical: 10,
+                                                    borderRightWidth: 1,
+                                                    borderRightColor: "#ccc"
+                                                }}
+                                                onPress={() => handlePress("+")}
+                                            >
+                                                <Text>+</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={{
+                                                    flex: 1,
+                                                    alignItems: 'center',
+                                                    paddingVertical: 10,
+                                                }}
+                                                onPress={() => handlePress("-")}
+                                            >
+                                                <Text>-</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ) : button === 'save' ? (
+                                        <TouchableOpacity
+                                            key={button}
+                                            style={{
+                                                backgroundColor: "#4CAF50",
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: '22%',
+                                                borderRadius: 10,
+                                                flexDirection: "row",
+                                                padding: 10
+                                            }}
+                                            onPress={() => handlePress("save")}
+                                        >
+                                            <Ionicons name="checkmark-outline" size={20} color="white" />
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <TouchableOpacity
+                                            key={button}
+                                            style={{
+                                                backgroundColor: "#ddd",
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: '22%',
+                                                borderRadius: 10,
+                                                padding: 10
+                                            }}
+                                            onPress={() => handlePress(button)}
+                                        >
+                                            {button === "today" ? (
+                                                <HStack space="xs" alignItems="center">
+                                                    <IconCustom name="calendar" size={14} color="#eab308" As={Ionicons} />
+                                                    <Text fontSize={8} color="#eab308">{date}</Text>
 
-                                    </TouchableOpacity>
+
+                                                </HStack>
+                                            ) : (
+                                                <Text>{button}</Text>
+                                            )}
+                                        </TouchableOpacity>
+                                    )
                                 ))}
                             </HStack>
                         ))}
                     </VStack>
                 </View>
+
+
             </VStack>
         </View>
     )

@@ -27,15 +27,14 @@ const AddKategori = ({ route }) => {
     const filteredIcons = Object.values(groupedIcons)
         .flat()
         .find((icon) => icon.key === selectedIndex);
-
     const handleSaveKategori = async () => {
         try {
             const result = await IdKategori();
             if (!route.params?.data) {
-                await InsertKategori(result + 1, kategoriName, filteredIcons?.kategoriIcon, "Ionicons", "0", active);
+                await InsertKategori(result + 1, kategoriName, filteredIcons?.kategoriIcon, "Ionicons", "1", active);
                 ShowToast(`Kategori ${kategoriName} ditambahkan`);
             } else {
-                await UpdateKategori(route.params.data.key, kategoriName, filteredIcons?.kategoriIcon, "Ionicons", "0", active);
+                await UpdateKategori(route.params.data.key, kategoriName, filteredIcons?.kategoriIcon, "Ionicons", route.params?.data?.active, active);
                 ShowToast(`Kategori ${kategoriName} diperbarui`);
             }
 
@@ -50,12 +49,12 @@ const AddKategori = ({ route }) => {
     useEffect(() => {
         saveKategori && kategoriName.length > 1 && handleSaveKategori();
     }, [saveKategori])
-
+    console.log(active)
     return (
         <SafeAreaCustom>
             <VStack paddingHorizontal={16} paddingVertical={16} space="md">
                 <HStack alignSelf="center" >
-                    <TouchableOpacity onPress={() => setActive("pengeluaran")}>
+                    <TouchableOpacity disabled={route.params?.data && route.params?.data?.keterangan == 'pemasukan'} onPress={() => setActive("pengeluaran")}>
                         <Box
                             bgColor={active === "pengeluaran" ? "$black" : "$yellow300"}
                             padding={10}
@@ -67,9 +66,9 @@ const AddKategori = ({ route }) => {
                         </Box>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => setActive("pemasukan")}>
+                    <TouchableOpacity disabled={route.params?.data && route.params?.data?.keterangan == 'pengeluaran'} onPress={() => setActive("pemasukan")}>
                         <Box
-                            bgColor={active === "pemasukan" ? "$black" : "$yellow300"}
+                            bgColor={active == "pemasukan" ? "$black" : "$yellow300"}
                             padding={10}
                             borderTopRightRadius={5}
                             borderBottomRightRadius={5}

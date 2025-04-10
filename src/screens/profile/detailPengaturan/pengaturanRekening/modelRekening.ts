@@ -81,6 +81,69 @@ const UpdateRekening = (data: RekeningInterface) => {
     });
 };
 
+const UpdateJumlah = (key, jumlah) => {
+    db.transaction(tx => {
+        tx.executeSql(
+            `UPDATE rekening 
+            SET jumlah = ?
+            WHERE key = ?`,
+            [jumlah, key],
+            (_, result) => {
+                console.log('Jumlah berhasil diupdate:', result.rowsAffected);
+            },
+            (_, error) => {
+                console.error('Error mengupdate jumlah rekening:', error);
+            }
+        );
+    });
+};
+
+
+
+const UpdateIsDefaultRekening = (key: number) => {
+    return new Promise<void>((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE rekening SET is_default = 0`,
+                [],
+                () => {
+                    tx.executeSql(
+                        `UPDATE rekening SET is_default = 1 WHERE key = ?`,
+                        [key],
+                        (_, result) => {
+                            if (result.rowsAffected > 0) {
+                                resolve();
+                            } else {
+                                reject(new Error("Gagal memperbarui rekening default"));
+                            }
+                        },
+                        (_, error) => reject(error)
+                    );
+                },
+                (_, error) => reject(error)
+            );
+        });
+    });
+};
+const CheckRekeningUsage = (key?: number): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `SELECT COUNT(*) as total FROM catatan WHERE id_rekening = ? OR id_rekening_tf = ?`,
+                [key, key],
+                (_, result) => {
+                    const count = result.rows.item(0).total;
+                    resolve(count > 0);
+                },
+                (_, error) => {
+                    console.error('Gagal memeriksa penggunaan rekening:', error);
+                    reject(error);
+                }
+            );
+        });
+    });
+};
+
 const DeleteRekening = (key: number | undefined) => {
     db.transaction(tx => {
         tx.executeSql(
@@ -146,5 +209,8 @@ export {
     UpdateRekening,
     DeleteRekening,
     GetAllRekening,
-    GetRekeningById
+    GetRekeningById,
+    UpdateIsDefaultRekening,
+    UpdateJumlah,
+    CheckRekeningUsage
 };

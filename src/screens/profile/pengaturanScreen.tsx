@@ -11,11 +11,14 @@ import Fontisto from "react-native-vector-icons/Fontisto"
 import Octicons from "react-native-vector-icons/Octicons"
 import { useNavigation } from "@react-navigation/native"
 import { useThousandSeparatorStore } from "@components/formatRibuan"
+import { useCurrency } from "@config/store"
 
 const PengaturanScreen = () => {
     const navigation = useNavigation<any>();
     const { isActive, toggleActive } = useThousandSeparatorStore();
     console.log('togle', isActive)
+    const { currency } = useCurrency();
+    const defaultCurrency = currency.find(value => value.is_default);
 
     return (
         <SafeAreaCustom>
@@ -50,7 +53,11 @@ const PengaturanScreen = () => {
                                     <IconCustom As={Fontisto} name="money-symbol" size={25} color="#fde047" style={{ top: -3 }} />
                                     <Text size="lg">Mata uang</Text>
                                 </HStack>
-                                <IconCustom As={Ionicons} name="chevron-forward-outline" size={25} color="#fde047" />
+                                <HStack alignItems="center" space="md">
+                                    <Text size="xs">{defaultCurrency?.short_code} ({defaultCurrency?.symbol})</Text>
+                                    <IconCustom As={Ionicons} name="chevron-forward-outline" size={25} color="#fde047" />
+                                </HStack>
+
                             </HStack>
                         </Box>
                     </TouchableOpacity>

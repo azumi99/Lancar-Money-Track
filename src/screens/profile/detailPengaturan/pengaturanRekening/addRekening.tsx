@@ -4,27 +4,30 @@ import { InputDefault } from "@components/input/inputDefault"
 import SafeAreaCustom from "@components/safeArea"
 import { SelectComponent } from "@components/select"
 import dataInterface from "@components/select/interface"
-import { useCurrency, useHockRekening } from "@config/store"
+import { useCurrency, useHockRekening, useRekeningData } from "@config/store"
 import { Box, Divider, HStack, ScrollView, Text, View, VStack } from "@gluestack-ui/themed"
 import { getCurrencyRates } from "@services/Currency/getCurrency"
 import React, { useEffect, useState } from "react"
 import { TouchableOpacity } from "react-native-gesture-handler"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import { ActionCurrencyScreen } from "../pengaturanCurrency/actionCurrencyScreen"
-import { AddRekening, GetAllRekening, RekeningInterface } from "./modelRekening"
+import { AddRekening, GetAllRekening, RekeningInterface, UpdateRekening } from "./modelRekening"
 import { ShowToast } from "@components/toast"
 import { useNavigation } from "@react-navigation/native"
 
-const AddRekeningScreen = () => {
+const AddRekeningScreen = ({ route }) => {
+
     const navigation = useNavigation<any>();
-    const [nameRek, setNameRek] = useState('');
     const { currency } = useCurrency();
+    const { rekening } = useRekeningData()
+    const dataUpdate = rekening.find(value => value?.key === route?.params?.id)
+    const [nameRek, setNameRek] = useState(dataUpdate ? dataUpdate.name : '');
     const { saveRekening, setSaveRekening } = useHockRekening();
     const selectedMataUang = currency?.find(value => value.is_default)
-    const [matauang, setMataUang] = useState(selectedMataUang?.short_code);
+    const [matauang, setMataUang] = useState(dataUpdate ? dataUpdate.matauang : selectedMataUang?.short_code);
     const temSelectCurrency = currency?.find(value => value.short_code === matauang)
     const dataTempCurrency: dataInterface[] = [
-        { label: `${temSelectCurrency?.name!} ${temSelectCurrency?.short_code!}`, value: temSelectCurrency?.short_code! },
+        { label: `${temSelectCurrency?.name!} ${temSelectCurrency?.short_code!} (${temSelectCurrency?.symbol!})`, value: temSelectCurrency?.short_code! },
     ];
 
     const dataRekening: dataInterface[] = [
@@ -37,16 +40,8 @@ const AddRekeningScreen = () => {
         { label: 'Berhutang padaku / Piutang', value: '7' },
         { label: 'Saya berhutang / Hutang', value: '8' },
     ];
-    const [jenis, setJenis] = useState<string | undefined>('1');
-    const [jumlah, setJumlah] = useState('');
-
-    useEffect(() => {
-        async function fetchRates() {
-            const data = await getCurrencyRates("USD", "USD,EUR,GBP,IDR");
-            console.log("Hasil Rates:", data);
-        }
-        fetchRates();
-    }, []);
+    const [jenis, setJenis] = useState<string | undefined>(dataUpdate ? dataUpdate.jenis : '1');
+    const [jumlah, setJumlah] = useState(dataUpdate ? dataUpdate.jumlah : '');
 
     const walletIcons = [
         "wallet-outline",
@@ -65,7 +60,7 @@ const AddRekeningScreen = () => {
         "trending-up-outline",
         "swap-horizontal-outline",
     ];
-    const [selectedIcon, setSelectedIcon] = useState(walletIcons[0]);
+    const [selectedIcon, setSelectedIcon] = useState(dataUpdate ? dataUpdate.iconname : walletIcons[0]);
     const [catatan, setCatatan] = useState('');
     const [showActionsheet, setShowActionsheet] = useState(false)
     const handleClose = () => setShowActionsheet(!showActionsheet)
@@ -76,24 +71,34 @@ const AddRekeningScreen = () => {
         }
 
         const newRekening: RekeningInterface = {
+            key: dataUpdate ? dataUpdate.key : undefined,
             name: nameRek,
             matauang: matauang!,
             jenis: jenis!,
             jumlah: Number(jumlah),
             iconname: selectedIcon,
             catatan: catatan,
-            is_default: false,
+            is_default: dataUpdate ? dataUpdate.is_default : false,
         };
 
-        await AddRekening(newRekening);
-        GetAllRekening();
-        setSaveRekening(false);
-        navigation.goBack();
+        try {
+            if (dataUpdate) {
+                UpdateRekening(newRekening);
+            } else {
+                await AddRekening(newRekening);
+            }
+
+            await GetAllRekening();
+            setSaveRekening(false);
+            navigation.goBack();
+        } catch (error) {
+            ShowToast("Gagal menyimpan data rekening");
+        }
     };
+
     useEffect(() => {
         saveRekening && nameRek.length > 1 && handleSave();
     }, [saveRekening])
-    console.log(saveRekening)
     return (
         <SafeAreaCustom>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -112,6 +117,7 @@ const AddRekeningScreen = () => {
                         />
                         <SelectComponent
                             data={dataTempCurrency}
+                            isDisabled={route?.params?.id ? true : false}
                             label="Mata uang"
                             valueChange={(value) => setMataUang(value)}
                             selectDefault={matauang}

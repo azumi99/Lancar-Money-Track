@@ -1,4 +1,5 @@
 import { CurrencyFormatter } from "@components/curencyComponent";
+import { formatThousand } from "@components/formatRibuan";
 import { IconCustom } from "@components/iconCustom";
 import { ModalCustom } from "@components/modalComponent"
 import SafeAreaCustom from "@components/safeArea"
@@ -6,7 +7,7 @@ import { DateCalenderDetail, DefaultDate, ModalDate } from "@config/store"
 import { AddIcon, Button, ButtonText, Fab, FabIcon, FabLabel, HStack, Text, View, VStack } from "@gluestack-ui/themed"
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { CatatanInterface } from "@screens/catatan/dummyData";
-import { GetCatatan } from "@screens/catatan/models/crudCatatan";
+import { GetCatatan, InterfaceCatatan } from "@screens/catatan/models/crudCatatan";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
@@ -21,7 +22,7 @@ const CalendarScreen = () => {
     const { setTitleDate } = DateCalenderDetail();
     const [dates, setDates] = useState(new Date());
     const { date, setDate } = DefaultDate()
-    const [data, setData] = useState<CatatanInterface[]>([]);
+    const [data, setData] = useState<InterfaceCatatan[]>([]);
     const year = dates.getFullYear();
     const shortMonth = dates.toLocaleString('default', { month: 'short' });
     const longMonth = dates.toLocaleString('default', { month: 'long' });
@@ -63,9 +64,9 @@ const CalendarScreen = () => {
                 notePengeluaran: 0
             };
         }
-        if (value.jenis === 'Pemasukan') {
+        if (value.jenis === 'pemasukan') {
             acc[date].notePemasukan += value.jumlah || 0;
-        } else if (value.jenis === 'Pengeluaran') {
+        } else if (value.jenis === 'pengeluaran') {
             acc[date].notePengeluaran += value.jumlah || 0;
         }
 
@@ -154,8 +155,19 @@ const CalendarScreen = () => {
                                         {!marking?.dots &&
                                             marking && (
                                                 <VStack>
-                                                    <CurrencyFormatter maxDigits={true} amount={marking?.notePemasukan} currency="IDR" style={{ fontSize: 10 }} />
-                                                    <CurrencyFormatter maxDigits={true} amount={marking?.notePengeluaran} currency="IDR" style={{ fontSize: 10 }} />
+                                                    <Text size="xs">
+                                                        +{formatThousand(marking?.notePemasukan)?.length > 5
+                                                            ? formatThousand(marking?.notePemasukan).slice(0, 5) + "..."
+                                                            : formatThousand(marking?.notePemasukan)}
+                                                    </Text>
+
+                                                    <Text size="xs">
+                                                        -{formatThousand(marking?.notePengeluaran)?.length > 5
+                                                            ? formatThousand(marking?.notePengeluaran).slice(0, 5) + "..."
+                                                            : formatThousand(marking?.notePengeluaran)}
+                                                    </Text>
+
+
                                                 </VStack>
                                             )
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { FlatList } from "react-native"
 import { View, Text, HStack, Box, Divider, Spinner } from "@gluestack-ui/themed"
 import SafeAreaCustom from "@components/safeArea"
-import { getListCurrency } from "@services/Currency/getCurrency"
+import { getListCurrency, getCurrencyRates } from "@services/Currency/getCurrency"
 import { TouchableOpacity } from "react-native-gesture-handler"
 import { InputDefault } from "@components/input/inputDefault"
 import { useCurrency, useCurrencySearch } from "@config/store"
@@ -22,6 +22,7 @@ export interface CurrencyItemInterface {
     decimal_mark: string
     thousands_separator: string
     is_default: boolean
+    value_convert: number
 }
 
 const CurrencyScreen = () => {
@@ -33,38 +34,97 @@ const CurrencyScreen = () => {
     const [showModal, setShowModal] = useState(false)
     const [selectedItem, setSelectedItem] = useState<CurrencyItemInterface | null>(null)
 
+    const fetchAllRates = async () => {
+        try {
+            // Get the default currency
+            const defaultCurrency = currency.find(item => item.is_default)
+            const baseCurrency = defaultCurrency ? defaultCurrency.short_code : "IDR"
+
+            // Get rates data
+            const ratesData = await getCurrencyRates(baseCurrency)
+            console.log(`Fetching rates with base currency: ${baseCurrency}`)
+
+            if (!ratesData || !ratesData.rates) {
+                console.error("Invalid rates data returned:", ratesData)
+                return currency
+            }
+
+            const rates = ratesData.rates
+            console.log("Available rates:", Object.keys(rates).length)
+
+            // Map the rates to each currency
+            return currency.map(item => {
+                const shortCode = item.short_code
+
+                // For base currency, value_convert should be 1
+                if (shortCode === baseCurrency) {
+                    return { ...item, value_convert: 1 }
+                }
+
+                // Try to find the rate for this currency
+                const rate = rates[shortCode]
+                if (rate !== undefined) {
+                    return { ...item, value_convert: rate }
+                } else {
+                    return { ...item, value_convert: 0 }
+                }
+            })
+        } catch (error) {
+            console.error("Error fetching rates:", error)
+            return currency
+        }
+    }
+
     useEffect(() => {
         setCurrencySearch(false)
 
-        async function fetchRates() {
-            const result = await getListCurrency()
-            let currencies = result.response
+        async function initialize() {
+            try {
+                // Get the list of currencies
+                const result = await getListCurrency()
 
-            const priorityCurrencies = ["IDR", "USD"]
-            const priorityList = currencies.filter(currency =>
-                priorityCurrencies.includes(currency.short_code)
-            )
-            const otherCurrencies = currencies.filter(currency =>
-                !priorityCurrencies.includes(currency.short_code)
-            )
-            const sortedData = [...priorityList, ...otherCurrencies]
+                if (!result || !result.response) {
+                    console.error("Invalid currency list data:", result)
+                    setIsLoading(false)
+                    return
+                }
 
-            const mergedData = sortedData.map(apiItem => {
-                const existingItem = currency.find(c => c.id === apiItem.id)
-                return existingItem ? { ...apiItem, is_default: existingItem.is_default } : { ...apiItem, is_default: false }
-            })
+                let currencies = result.response
 
-            if (JSON.stringify(currency) !== JSON.stringify(mergedData)) {
-                setCurrency(mergedData)
+                // Apply priority sorting
+                const priorityCurrencies = ["IDR", "USD"]
+                const priorityList = currencies.filter(currency =>
+                    priorityCurrencies.includes(currency.short_code)
+                )
+                const otherCurrencies = currencies.filter(currency =>
+                    !priorityCurrencies.includes(currency.short_code)
+                )
+                const sortedData = [...priorityList, ...otherCurrencies]
+
+                // Merge with existing state
+                const initialData = sortedData.map(apiItem => {
+                    const existingItem = currency.find(c => c.id === apiItem.id)
+                    return existingItem
+                        ? { ...apiItem, is_default: existingItem.is_default }
+                        : { ...apiItem, is_default: apiItem.short_code === "IDR" }
+                })
+
+                // Set initial data to currency state
+                setCurrency(initialData)
+
+                // Now fetch and apply rates
+                const dataWithRates = await fetchAllRates()
+                setCurrency(dataWithRates)
+                setFilteredData(dataWithRates)
+            } catch (error) {
+                console.error("Error initializing currency data:", error)
+            } finally {
+                setIsLoading(false)
             }
-            setFilteredData(mergedData)
-            setIsLoading(false)
         }
 
-
-        fetchRates()
+        initialize()
     }, [])
-
 
     useEffect(() => {
         if (search === '') {
@@ -79,14 +139,47 @@ const CurrencyScreen = () => {
         }
     }, [search, currency])
 
-    const handleSelectCurrency = (selectedItem: CurrencyItemInterface) => {
-        const updatedCurrency = currency.map(item => ({
-            ...item,
-            is_default: item.id === selectedItem.id
-        }))
-        setCurrency(updatedCurrency)
-        setShowModal(false);
+    const handleSelectCurrency = async (selectedItem: CurrencyItemInterface) => {
+        try {
+            setIsLoading(true)
+
+            // Update default currency
+            const updatedCurrency = currency.map(item => ({
+                ...item,
+                is_default: item.id === selectedItem.id
+            }))
+            setCurrency(updatedCurrency)
+            setShowModal(false)
+
+            // Fetch new rates for the selected currency
+            const ratesData = await getCurrencyRates(selectedItem.short_code)
+            if (!ratesData || !ratesData.rates) {
+                console.error("Invalid rates data returned:", ratesData)
+                setIsLoading(false)
+                return
+            }
+
+            const rates = ratesData.rates
+
+            // Update all currencies with new rates
+            const finalCurrency = updatedCurrency.map(item => {
+                if (item.short_code === selectedItem.short_code) {
+                    return { ...item, value_convert: 1 }
+                }
+
+                const rate = rates[item.short_code]
+                return { ...item, value_convert: rate !== undefined ? rate : 0 }
+            })
+
+            setCurrency(finalCurrency)
+            setFilteredData(finalCurrency)
+        } catch (error) {
+            console.error("Error updating currency and rates:", error)
+        } finally {
+            setIsLoading(false)
+        }
     }
+
     const handlePress = (item: CurrencyItemInterface) => {
         setSelectedItem(item)
         setShowModal(true)

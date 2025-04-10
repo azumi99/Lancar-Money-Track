@@ -2,7 +2,7 @@ import { IconCustom } from "@components/iconCustom"
 import SafeAreaCustom from "@components/safeArea"
 import { AddIcon, Box, Fab, FabIcon, HStack, Text, View } from "@gluestack-ui/themed"
 import React, { useCallback, useEffect, useState } from "react"
-import { TouchableOpacity } from "react-native"
+import { LogBox, TouchableOpacity } from "react-native"
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-native-draggable-flatlist"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import Entypo from "react-native-vector-icons/Entypo"
@@ -10,24 +10,43 @@ import { useRekeningData } from "@config/store"
 import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { fetchRekening } from "./globalFuncGetRekening"
 import { DeleteConfirm } from "@components/modalConfirm/deleteConfirm"
-import { DeleteRekening } from "./modelRekening"
+import { CheckRekeningUsage, DeleteRekening, UpdateIsDefaultRekening } from "./modelRekening"
 import { ShowToast } from "@components/toast"
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 
 const RekeningScreen = () => {
     const { rekening, setRekening } = useRekeningData();
     const [showAlertDialog, setShowAlertDialog] = useState(false);
     const [keyDel, setKeyDel] = useState<number | undefined>(0);
     const navigation = useNavigation<any>();
+    LogBox.ignoreLogs([
+        '[Reanimated] Tried to modify key `current` of an object which has been already passed to a worklet.',
+    ]);
+
     const handleDelete = async () => {
         try {
-            await DeleteRekening(keyDel);
-            fetchRekening({ rekening, setRekening });
-            setShowAlertDialog(false);
+            const used = await CheckRekeningUsage(keyDel);
+            if (used) {
+                ShowToast('Rekening sedang digunakan dalam catatan');
+                return;
+            } else {
+                await DeleteRekening(keyDel);
+                fetchRekening({ rekening, setRekening });
+                setShowAlertDialog(false);
+            }
+
         } catch (error) {
             ShowToast('Ada masalah');
         }
     };
-
+    const handleSetDefault = async (key: number) => {
+        try {
+            await UpdateIsDefaultRekening(key);
+            fetchRekening({ rekening, setRekening });
+        } catch (error) {
+            ShowToast("Gagal memperbarui rekening default");
+        }
+    };
     useFocusEffect(
         useCallback(() => {
             fetchRekening({ rekening, setRekening });
@@ -42,7 +61,7 @@ const RekeningScreen = () => {
                     keyExtractor={(item) => String(item.key)}
                     renderItem={({ item, drag, isActive }: RenderItemParams<typeof rekening[0]>) => (
                         <ScaleDecorator>
-                            <TouchableOpacity onLongPress={drag} disabled={isActive} >
+                            <TouchableOpacity onLongPress={drag} disabled={isActive} onPress={() => navigation.navigate('StackNav', { screen: "AddRekeningScreen", params: { id: item.key } })} >
                                 <Box bgColor="white" padding={16} marginVertical={4}>
                                     <HStack alignItems="center" justifyContent="space-between">
                                         <HStack alignItems="center" space="md">
@@ -54,7 +73,12 @@ const RekeningScreen = () => {
                                             </Box>
                                             <Text>{item.name}</Text>
                                         </HStack>
-                                        <IconCustom As={Ionicons} name="reorder-four-outline" size={25} />
+                                        <HStack alignItems="center" space="xs">
+                                            <TouchableOpacity onPress={() => handleSetDefault(item.key ?? 0)}>
+                                                <IconCustom As={MaterialCommunityIcons} name="pin" size={25} color={item.is_default ? "#fde047" : '#aaa'} />
+                                            </TouchableOpacity>
+                                            <IconCustom As={Ionicons} name="reorder-four-outline" size={25} />
+                                        </HStack>
                                     </HStack>
                                 </Box>
                             </TouchableOpacity>

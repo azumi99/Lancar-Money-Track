@@ -15,13 +15,15 @@ import {
   MessageStore,
   ModalDate,
   NotifStore,
+  PadStore,
   SaveKategori,
   navigateIdRequestStore,
   useCurrencySearch,
   useHockRekening,
+  useHookActionCurrency,
 } from '@config/store';
 
-import { HStack, Text } from '@gluestack-ui/themed';
+import { HStack, Text, View } from '@gluestack-ui/themed';
 import { DetailScreen } from '@screens/detail';
 import { CatatanDetail } from '@screens/catatan/detailCatatan';
 import { CalendarScreen } from '@screens/calendar';
@@ -34,6 +36,8 @@ import { AddKategori } from '@screens/profile/detailPengaturan/pengaturanKategor
 import { RekeningScreen } from '@screens/profile/detailPengaturan/pengaturanRekening/rekeningScreen';
 import { AddRekeningScreen } from '@screens/profile/detailPengaturan/pengaturanRekening/addRekening';
 import { CurrencyScreen } from '@screens/profile/detailPengaturan/pengaturanCurrency/currencyScreen';
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { SearchMainScreen } from '@screens/catatan/searchScreen';
 const Stack = createNativeStackNavigator();
 export const StackNavigation = ({ route }) => {
   const navigation = useNavigation<any>();
@@ -52,6 +56,8 @@ export const StackNavigation = ({ route }) => {
   const { date } = DefaultDate();
   const { setModalDate } = ModalDate()
   const { currencySearch, setCurrencySearch } = useCurrencySearch();
+  const { handleOpen, setHandleOpen } = useHookActionCurrency();
+  const { pad } = PadStore();
   // console.log(route.params.params.title)
 
   return (
@@ -181,11 +187,14 @@ export const StackNavigation = ({ route }) => {
               <Text color='black'>Batalkan</Text>
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={() => setEdit(!edit)}>
-              <IconCustom As={Ionicons} name="calendar" size={20} />
-            </TouchableOpacity>
-          ),
+          headerRight: () => {
+            return pad && (
+              <TouchableOpacity onPress={() => setHandleOpen(!handleOpen)}>
+                <IconCustom As={MaterialIcons} name="currency-exchange" size={20} />
+              </TouchableOpacity>
+            );
+          }
+
         }}
       />
       <Stack.Screen
@@ -297,6 +306,26 @@ export const StackNavigation = ({ route }) => {
           ),
 
 
+        }}
+      />
+      <Stack.Screen
+        name="SearchMainScreen"
+        component={SearchMainScreen}
+        options={{
+          title: 'Pencarian',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
         }}
       />
     </Stack.Navigator>

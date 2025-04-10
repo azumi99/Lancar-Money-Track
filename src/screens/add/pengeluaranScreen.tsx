@@ -1,4 +1,4 @@
-import { PadStore, useKategoriStorePengeluaran } from "@config/store";
+import { PadStore, useKategoriStorePengeluaran, useSelectedKategori } from "@config/store";
 import { Text, View } from "@gluestack-ui/themed";
 import React, { useEffect } from "react";
 import { useState } from "react";
@@ -10,17 +10,17 @@ import { fetchPengeluaran } from "@screens/profile/detailPengaturan/pengaturanKa
 
 const Pengeluaran = () => {
     const { pad, setPad } = PadStore();
-    const [selectedIndex, setSelectedIndex] = useState<number | null>();
+    const { selectedIndex, setSelectedIndex } = useSelectedKategori();
     const { kategori, setKategori } = useKategoriStorePengeluaran();
-
     useEffect(() => {
         fetchPengeluaran({ kategori, setKategori })
     }, [])
-
+    const dataKategori = kategori.filter((item) => item.active === '1');
+    console.log('dataKategori', selectedIndex)
     return (
         <View >
             <FlatList
-                data={kategori}
+                data={dataKategori}
                 renderItem={({ item, index }) => {
                     const title = item?.title || '';
                     const firstLine = title.slice(0, 10);
@@ -28,8 +28,8 @@ const Pengeluaran = () => {
 
 
                     return (
-                        <TouchableOpacity onPress={() => { setPad(!pad); setSelectedIndex(index); }} style={{ alignItems: 'center', width: '25%', height: 90, justifyContent: 'center' }}>
-                            <View style={{ padding: 10, borderRadius: 50, backgroundColor: selectedIndex === index && pad ? '#fde047' : '#E0E0E0' }}>
+                        <TouchableOpacity onPress={() => { setPad(!pad); setSelectedIndex(item?.key); }} style={{ alignItems: 'center', width: '25%', height: 90, justifyContent: 'center' }}>
+                            <View style={{ padding: 10, borderRadius: 50, backgroundColor: selectedIndex === item?.key && pad ? '#fde047' : '#E0E0E0' }}>
                                 <IconCustom As={Ionicons} name={item?.kategoriIcon} size={20} />
                             </View>
                             <Text size="xs" >{firstLine}</Text>
