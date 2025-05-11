@@ -38,6 +38,22 @@ import { AddRekeningScreen } from '@screens/profile/detailPengaturan/pengaturanR
 import { CurrencyScreen } from '@screens/profile/detailPengaturan/pengaturanCurrency/currencyScreen';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { SearchMainScreen } from '@screens/catatan/searchScreen';
+import { ProfileScreen } from '@screens/profile';
+import { EditProfileScreen } from '@screens/profile/pengaturanProfile/profileScreen';
+import { BackupScreen } from '@screens/profile/detailPengaturan/backupScreen';
+import { playBeep } from '@utils/soundUtils';
+import { TermsAndConditions } from '@screens/profile/detailPengaturan/syaratScreen';
+import { PrivacyPolicyScreen } from '@screens/profile/detailPengaturan/kebijakanScreen';
+import { EksporScreen } from '@screens/ekspor';
+import { WaktuLaporanScreen } from '@screens/waktuLaporan';
+import { PembayaranScreen } from '@screens/pembayaran';
+import { PembayaranFormScreen } from '@screens/pembayaran/formPembayaran';
+import { ReminderScreen } from '@screens/reminder';
+import { FormReminderScreen } from '@screens/reminder/addReminder';
+import { AnggaranScreen } from '@screens/anggaran';
+import { ResetCacheScreen } from '@screens/cacheScreen';
+import { StatistikBulananScreen } from '@screens/laporan/statistikBulanan';
+import { BudgetReport } from '@screens/laporan/anggaranStatistik';
 const Stack = createNativeStackNavigator();
 export const StackNavigation = ({ route }) => {
   const navigation = useNavigation<any>();
@@ -114,6 +130,7 @@ export const StackNavigation = ({ route }) => {
             !route.params.params?.back &&
             <TouchableOpacity
               onPress={() => {
+                playBeep();
                 setIdNav(0);
                 navigation.goBack();
               }}>
@@ -127,7 +144,7 @@ export const StackNavigation = ({ route }) => {
         component={DetailCalendar}
         options={{
           title: titleDate,
-          headerBackVisible: true,
+          // headerBackVisible: true,
           headerShown: true,
           headerTitleAlign: 'center',
 
@@ -135,6 +152,16 @@ export const StackNavigation = ({ route }) => {
             backgroundColor: '#fde047',
 
           },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => {
+                playBeep();
+                navigation.navigate('StackNav', { screen: 'CalendarScreen' })
+              }}
+            >
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -152,6 +179,7 @@ export const StackNavigation = ({ route }) => {
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {
+                playBeep()
                 setIdNav(0);
                 navigation.goBack();
               }}>
@@ -159,7 +187,7 @@ export const StackNavigation = ({ route }) => {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => setModalDate(true)}>
+            <TouchableOpacity onPress={() => { playBeep(); setModalDate(true) }}>
               <HStack alignItems='center'>
                 <Text mt={5}>{date}</Text>
                 <IconCustom As={Ionicons} name="caret-down" size={30} />
@@ -173,7 +201,7 @@ export const StackNavigation = ({ route }) => {
         component={AddScreen}
         options={{
           title: 'Tambahkan',
-          headerBackVisible: route?.params?.params?.name,
+
           headerShown: true,
           headerTitleAlign: 'center',
           headerStyle: {
@@ -181,15 +209,15 @@ export const StackNavigation = ({ route }) => {
           },
 
           headerLeft: () => (
-            !route.params.params?.name &&
+
             <TouchableOpacity
-              onPress={() => navigation.goBack()} style={{ marginTop: 7 }}>
+              onPress={() => { playBeep(); route.params.params?.name ? navigation.navigate('StackNav', { screen: 'CalendarScreen' }) : navigation.goBack() }} style={{ marginTop: 7 }}>
               <Text color='black'>Batalkan</Text>
             </TouchableOpacity>
           ),
           headerRight: () => {
             return pad && (
-              <TouchableOpacity onPress={() => setHandleOpen(!handleOpen)}>
+              <TouchableOpacity onPress={() => { playBeep(); setHandleOpen(!handleOpen) }}>
                 <IconCustom As={MaterialIcons} name="currency-exchange" size={20} />
               </TouchableOpacity>
             );
@@ -320,6 +348,27 @@ export const StackNavigation = ({ route }) => {
           },
           headerLeft: () => (
             <TouchableOpacity
+              onPress={() => {
+                playBeep()
+                navigation.goBack()
+              }}>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+        }}
+      />
+      <Stack.Screen
+        name="EditProfileScreen"
+        component={EditProfileScreen}
+        options={{
+          title: 'Pengaturan Profil',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
               onPress={() =>
                 navigation.goBack()
               }>
@@ -328,6 +377,266 @@ export const StackNavigation = ({ route }) => {
           )
         }}
       />
+      <Stack.Screen
+        name="BackupScreen"
+        component={BackupScreen}
+        options={{
+          title: 'Backup',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="EksporScreen"
+        component={EksporScreen}
+        options={{
+          title: 'Ekspor Data',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="WaktuLaporanScreen"
+        component={WaktuLaporanScreen}
+        options={{
+          title: 'Tanggal Mulai Bulanan',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="PembayaranScreen"
+        component={PembayaranScreen}
+        options={{
+          title: 'Pembayaran Regular',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="PembayaranFormScreen"
+        component={PembayaranFormScreen}
+        options={{
+          title: 'Tambah Pembayaran',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('StackNav', { screen: "PembayaranScreen" })
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="ReminderScreen"
+        component={ReminderScreen}
+        options={{
+          title: 'Pengingat',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="FormReminderScreen"
+        component={FormReminderScreen}
+        options={{
+          title: 'Form Pengingat',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('StackNav', { screen: "ReminderScreen" })
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="AnggaranScreen"
+        component={AnggaranScreen}
+        options={{
+          title: 'Anggaran',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="ResetCacheScreen"
+        component={ResetCacheScreen}
+        options={{
+          title: 'Reset Cache',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="StatistikBulananScreen"
+        component={StatistikBulananScreen}
+        options={{
+          title: 'Statistik Bulanan',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="BudgetReport"
+        component={BudgetReport}
+        options={{
+          title: 'Statistik Anggaran',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.goBack()
+              }>
+              <IconCustom As={Ionicons} name="arrow-back" size={20} />
+            </TouchableOpacity>
+          )
+
+        }}
+      />
+      <Stack.Screen
+        name="TermsAndConditions"
+        component={TermsAndConditions}
+        options={{
+          title: 'Syarat & Ketentuan',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+
+        }}
+      />
+      <Stack.Screen
+        name="PrivacyPolicyScreen"
+        component={PrivacyPolicyScreen}
+        options={{
+          title: 'Kebijakan Privasi',
+          headerBackVisible: true,
+          headerShown: true,
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fde047',
+          },
+
+        }}
+      />
     </Stack.Navigator>
+
   );
 };

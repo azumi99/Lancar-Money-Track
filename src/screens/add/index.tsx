@@ -1,6 +1,6 @@
 import { PadStore, useCurrency, useDefaultOpenRek, useHookActionCurrency, useHookDataCurrency, useKategoriStorePengeluaran, useRekeningData, useRekeningTransferStore, useSelectedKategori } from "@config/store";
 import React, { useCallback, useEffect, useState } from "react";
-import { useWindowDimensions, StyleSheet } from "react-native";
+import { useWindowDimensions, StyleSheet, PermissionsAndroid, Platform } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { Asset, CameraOptions, ImageLibraryOptions, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { getCurrencyRates } from "@services/Currency/getCurrency";
@@ -20,6 +20,7 @@ import { ShowToast } from "@components/toast";
 import RNFS from 'react-native-fs';
 import { GetRekeningById, UpdateJumlah } from "@screens/profile/detailPengaturan/pengaturanRekening/modelRekening";
 import { fetchRekening } from "@screens/profile/detailPengaturan/pengaturanRekening/globalFuncGetRekening";
+import { playBeep } from "@utils/soundUtils";
 
 
 const renderScene = SceneMap({
@@ -70,21 +71,56 @@ const AddScreen = ({ route }) => {
     };
 
     console.log('date', new Date().toISOString().slice(0, 10))
-    const [routes] = useState([
+    const jenis = route.params?.jenis
+    const regular = route.params?.regular
+    const [routes] = useState(() => {
+        const allRoutes = [
+            { key: "pengeluaran", title: "Pengeluaran" },
+            { key: "pemasukan", title: "Pemasukan" },
+            { key: "transfer", title: "Transfer" },
+        ].map(item => ({ ...item, params: regular }))
 
-        { key: "pengeluaran", title: "Pengeluaran" },
-        { key: "pemasukan", title: "Pemasukan" },
-        { key: "transfer", title: "Transfer" },
-    ]);
+        if (jenis) {
+            return allRoutes.filter(route => route.key === jenis)
+        }
+
+        return allRoutes
+    })
     const [index, setIndex] = useState(() => {
         if (typeof defaultTab === 'number') return defaultTab;
 
         const defaultIndex = routes.findIndex(route => route.key === defaultTab);
         return defaultIndex !== -1 ? defaultIndex : 0;
     });
+    const requestCameraPermission = async () => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: "Akses Kamera Dibutuhkan",
+                        message: "Aplikasi membutuhkan akses ke kamera untuk mengambil foto.",
+                        buttonNeutral: "Tanya Nanti",
+                        buttonNegative: "Batal",
+                        buttonPositive: "Izinkan"
+                    }
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        }
+        return true;
+    };
 
+    const openCamera = async () => {
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+            ShowToast("Izin kamera ditolak");
+            return;
+        }
 
-    const openCamera = () => {
         const options: CameraOptions = {
             mediaType: 'photo',
             quality: 1,
@@ -338,7 +374,7 @@ const AddScreen = ({ route }) => {
             <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
-                onIndexChange={(index) => { setIndex(index); setPad(false); setDate(new Date().toISOString().slice(0, 10)); setImages([]); }}
+                onIndexChange={(index) => { playBeep(); setIndex(index); setPad(false); setDate(new Date().toISOString().slice(0, 10)); setImages([]); }}
                 initialLayout={{ width: layout.width }}
                 renderTabBar={renderTabBar} />
             <DateModal showModal={showModal} setShowModal={setShowModal} getFormatedDate={getFormattedDate()} setDate={setDate} date={date} />

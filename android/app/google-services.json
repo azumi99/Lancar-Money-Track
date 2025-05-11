@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "238776374047",
+    "project_id": "lancar-app-10a07",
+    "storage_bucket": "lancar-app-10a07.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:238776374047:android:4d052caf29530e41e3562a",
+        "android_client_info": {
+          "package_name": "com.money_track"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "238776374047-6gn2vikkvc403pgeucfe00rp7kneq4gv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.money_track",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "238776374047-v21j7phidrna3la85s5p73qkemiu7n1e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCn1a48yZLrR7yaDqPG027pZUEyB1ydj1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "238776374047-v21j7phidrna3la85s5p73qkemiu7n1e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

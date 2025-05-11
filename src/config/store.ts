@@ -23,23 +23,25 @@ const TokenJwt = create<JwtState>()(
   ),
 );
 export interface UserData {
-  id?: number;
-  name?: string;
-  email?: string;
-  role?: string;
-  url?: string;
+  id: string;
+  name: string | null;
+  email: string;
+  photo: string | null;
+  familyName: string | null;
+  givenName: string | null;
 }
+
 
 interface UserState {
   user: UserData | null;
-  setUser: (userData: UserData) => void;
+  setUser: (user: UserData | null) => void;
 }
 
 const UserStore = create<UserState>()(
   persist(
     set => ({
       user: null,
-      setUser: (userData: UserData) => set({ user: userData }),
+      setUser: (userData: UserData | null) => set({ user: userData }),
     }),
     {
       name: 'user-data',
@@ -170,13 +172,7 @@ const navigateIdRequestStore = create<navigateIdRequestInterface>()(set => ({
   setIdNav: (value: number) => set({ idNav: value }),
 }));
 
-export interface UserData {
-  id?: number;
-  name?: string;
-  email?: string;
-  role?: string;
-  url?: string;
-}
+
 interface FcmInterface {
   fcmtoken: string;
   setFcmtoken: (value: string) => void;
@@ -353,6 +349,33 @@ const useRekeningTransferStore = create<RekeningTransferStore>((set) => ({
   resetRekeningTransfer: () => set({ selectedRekeningFrom: undefined, selectedRekeningTo: undefined }),
 }));
 
+interface SuaraState {
+  suara: boolean;
+  setSuara: (val: boolean) => void;
+}
+const SuaraOnOff = create<SuaraState>((set) => ({
+  suara: false,
+  setSuara: (val) => set({ suara: val }),
+}));
+
+interface TanggalMulaiInterface {
+  tanggal: string;
+  setTanggal: (val: string) => void;
+}
+const useTanggalMulai = create<TanggalMulaiInterface>()(
+  persist(
+    set => ({
+      tanggal: "1",
+      setTanggal: (val) => set({ tanggal: val }),
+    }),
+    {
+      name: 'tanggal-awal',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+
+
 
 
 export {
@@ -383,5 +406,7 @@ export {
   useDefaultOpenRek,
   useHookDataCurrency,
   useSelectedKategori,
-  useRekeningTransferStore
+  SuaraOnOff,
+  useRekeningTransferStore,
+  useTanggalMulai
 };

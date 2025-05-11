@@ -9,6 +9,7 @@ import { useCurrency, useCurrencySearch } from "@config/store"
 import { IconCustom } from "@components/iconCustom"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import { ModalKonfirmasiCurrency } from "./components/modalKonfirmasi"
+import { initialize } from "./utils"
 
 export interface CurrencyItemInterface {
     id: number
@@ -34,96 +35,12 @@ const CurrencyScreen = () => {
     const [showModal, setShowModal] = useState(false)
     const [selectedItem, setSelectedItem] = useState<CurrencyItemInterface | null>(null)
 
-    const fetchAllRates = async () => {
-        try {
-            // Get the default currency
-            const defaultCurrency = currency.find(item => item.is_default)
-            const baseCurrency = defaultCurrency ? defaultCurrency.short_code : "IDR"
 
-            // Get rates data
-            const ratesData = await getCurrencyRates(baseCurrency)
-            console.log(`Fetching rates with base currency: ${baseCurrency}`)
-
-            if (!ratesData || !ratesData.rates) {
-                console.error("Invalid rates data returned:", ratesData)
-                return currency
-            }
-
-            const rates = ratesData.rates
-            console.log("Available rates:", Object.keys(rates).length)
-
-            // Map the rates to each currency
-            return currency.map(item => {
-                const shortCode = item.short_code
-
-                // For base currency, value_convert should be 1
-                if (shortCode === baseCurrency) {
-                    return { ...item, value_convert: 1 }
-                }
-
-                // Try to find the rate for this currency
-                const rate = rates[shortCode]
-                if (rate !== undefined) {
-                    return { ...item, value_convert: rate }
-                } else {
-                    return { ...item, value_convert: 0 }
-                }
-            })
-        } catch (error) {
-            console.error("Error fetching rates:", error)
-            return currency
-        }
-    }
 
     useEffect(() => {
         setCurrencySearch(false)
 
-        async function initialize() {
-            try {
-                // Get the list of currencies
-                const result = await getListCurrency()
-
-                if (!result || !result.response) {
-                    console.error("Invalid currency list data:", result)
-                    setIsLoading(false)
-                    return
-                }
-
-                let currencies = result.response
-
-                // Apply priority sorting
-                const priorityCurrencies = ["IDR", "USD"]
-                const priorityList = currencies.filter(currency =>
-                    priorityCurrencies.includes(currency.short_code)
-                )
-                const otherCurrencies = currencies.filter(currency =>
-                    !priorityCurrencies.includes(currency.short_code)
-                )
-                const sortedData = [...priorityList, ...otherCurrencies]
-
-                // Merge with existing state
-                const initialData = sortedData.map(apiItem => {
-                    const existingItem = currency.find(c => c.id === apiItem.id)
-                    return existingItem
-                        ? { ...apiItem, is_default: existingItem.is_default }
-                        : { ...apiItem, is_default: apiItem.short_code === "IDR" }
-                })
-
-                // Set initial data to currency state
-                setCurrency(initialData)
-
-                // Now fetch and apply rates
-                const dataWithRates = await fetchAllRates()
-                setCurrency(dataWithRates)
-                setFilteredData(dataWithRates)
-            } catch (error) {
-                console.error("Error initializing currency data:", error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        initialize()
+        initialize({ currency, setCurrency, setFilteredData, setIsLoading })
     }, [])
 
     useEffect(() => {

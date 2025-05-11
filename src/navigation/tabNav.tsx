@@ -13,6 +13,8 @@ import { ChartScreen } from '@screens/chart';
 import { LaporanScreen } from '@screens/laporan';
 import { AddScreen } from '@screens/add';
 import { StackNavigation } from './stackNav';
+import { TouchableOpacity } from 'react-native';
+import { playBeep } from '@utils/soundUtils';
 
 
 const TabNav = () => {
@@ -130,6 +132,15 @@ const TabNav = () => {
         component={CatatanScreen}
         options={{
           tabBarIcon: ({ color, focused }) => iconHome(color, focused),
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={(e) => {
+                playBeep();
+                props.onPress?.(e);
+              }}
+            />
+          ),
         }}
       />
       <Tab.Screen
@@ -137,20 +148,27 @@ const TabNav = () => {
         component={ChartScreen}
         options={{
           tabBarIcon: ({ color, focused }) => iconChart(color, focused),
-
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={(e) => {
+                playBeep();
+                props.onPress?.(e);
+              }}
+            />
+          ),
         }}
-
       />
       <Tab.Screen
         name="AddScreen"
         component={AddScreen}
         options={{
           tabBarIcon: ({ color, focused }) => iconAdd(color, focused),
-
         }}
         listeners={({ navigation }) => ({
           tabPress: (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Mencegah default navigate
+            playBeep();         // Mainkan suara
             navigation.navigate('StackNav', { screen: 'AddScreen' });
           },
         })}
@@ -160,14 +178,32 @@ const TabNav = () => {
         component={LaporanScreen}
         options={{
           tabBarIcon: ({ color, focused }) => iconLaporan(color, focused),
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={(e) => {
+                playBeep();
+                props.onPress?.(e);
+              }}
+            />
+          ),
         }}
       />
       <Tab.Screen
         name="ProfileScreen"
         component={ProfileScreen}
-        options={{
+        options={({ navigation }) => ({
           tabBarIcon: ({ color, focused }) => iconAccount(color, focused),
-        }}
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={(e) => {
+                playBeep();
+                props.onPress?.(e);
+              }}
+            />
+          ),
+        })}
       />
 
     </Tab.Navigator>

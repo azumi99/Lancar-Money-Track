@@ -11,6 +11,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { GetCatatan, handleDelete, InterfaceCatatan } from "../models/crudCatatan"
 import { useRekeningData } from "@config/store"
 import { DeleteConfirm } from "@components/modalConfirm/deleteConfirm"
+import { playBeep } from "@utils/soundUtils"
 
 const SearchMainScreen = () => {
     const [search, setSearch] = useState<string>("")
@@ -107,12 +108,12 @@ const SearchMainScreen = () => {
 
     const renderRightActions = (item) => (
         <HStack alignItems="center" ml={10}>
-            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: item } })}>
+            <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: item } }) }}>
                 <Box py="100%" bgColor="$amber400" justifyContent="center" alignItems="center" width={70}>
                     <Text color="white">Edit</Text>
                 </Box>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setIdToDelete(item.id); setShowAlertDialog(true); }}>
+            <TouchableOpacity onPress={() => { playBeep(); setIdToDelete(item.id); setShowAlertDialog(true); }}>
                 <Box py="100%" bgColor="$rose400" justifyContent="center" alignItems="center" width={70}>
                     <Text color="white">Hapus</Text>
                 </Box>
@@ -137,7 +138,7 @@ const SearchMainScreen = () => {
                 {['all', 'pemasukan', 'pengeluaran', 'transfer'].map((jenis) => (
                     <TouchableOpacity
                         key={jenis}
-                        onPress={() => setJenisFilter(jenis as any)}
+                        onPress={() => { playBeep(); setJenisFilter(jenis as any) }}
                         style={{
                             paddingVertical: 6,
                             paddingHorizontal: 12,
@@ -194,7 +195,7 @@ const SearchMainScreen = () => {
                                             }}
                                             renderRightActions={() => renderRightActions(itemData)}
                                         >
-                                            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'CatatanDetail', params: { data: itemData } })}>
+                                            <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'CatatanDetail', params: { data: itemData } }) }}>
                                                 <Box
                                                     borderBottomWidth={0.1}
                                                     borderColor="$trueGray400"

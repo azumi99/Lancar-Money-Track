@@ -16,6 +16,7 @@ export interface InterfaceCatatan {
     id_rekening: number;
     id_rekening_tf?: number;
     id_kategori: number;
+    title?: string;
 }
 
 
@@ -88,7 +89,8 @@ const GetCatatan = (): Promise<InterfaceCatatan[]> => {
                 `SELECT
             catatan.*,
             kategori.kategoriIcon,
-            kategori.vendor
+            kategori.vendor,
+            kategori.title
           FROM catatan
           LEFT JOIN kategori ON catatan.id_kategori = kategori.key`,
                 [],

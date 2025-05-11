@@ -8,6 +8,7 @@ import { AddIcon, Button, ButtonText, Fab, FabIcon, FabLabel, HStack, Text, View
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { CatatanInterface } from "@screens/catatan/dummyData";
 import { GetCatatan, InterfaceCatatan } from "@screens/catatan/models/crudCatatan";
+import { playBeep } from "@utils/soundUtils";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
@@ -105,6 +106,7 @@ const CalendarScreen = () => {
                         return (
                             <TouchableOpacity onPress={() => {
                                 // console.log('Selected date', date);
+                                playBeep();
                                 const day = new Date(date.dateString);
                                 const formattedDate = day.toLocaleDateString('id-ID', {
                                     weekday: 'long',
@@ -210,7 +212,7 @@ const CalendarScreen = () => {
                 size="lg"
                 placement="bottom right"
                 bgColor="$yellow500"
-                onPress={() => navigation.navigate('StackNav', { screen: 'AddScreen', params: { name: true } })}
+                onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'AddScreen', params: { name: true } }) }}
             >
                 <FabIcon as={AddIcon} />
             </Fab>

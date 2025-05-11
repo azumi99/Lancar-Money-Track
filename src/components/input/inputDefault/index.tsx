@@ -10,6 +10,7 @@ import {
   Input,
   InputField,
   InputSlot,
+  Pressable,
 } from "@gluestack-ui/themed";
 import { DimensionValue, KeyboardTypeOptions } from "react-native";
 
@@ -34,6 +35,7 @@ type Props = {
   defaultValue?: string;
   width?: DimensionValue;
   autoFocus?: boolean;
+  readonly?: boolean;
 };
 
 export const formatThousand = (value: string): string => {
@@ -63,6 +65,7 @@ const InputDefault: React.FC<Props> = ({
   defaultValue,
   width,
   autoFocus,
+  readonly = false,
 }) => {
   const handleChange = (input: string) => {
     if (fieldInput === "numeric") {
@@ -80,21 +83,21 @@ const InputDefault: React.FC<Props> = ({
           <FormControlLabelText>{label}</FormControlLabelText>
         </FormControlLabel>
       )}
-
-      <Input variant={variant} size={size} borderRadius={10} isDisabled={isDisabled} borderColor={borderColor} backgroundColor={bgColor}>
-        {showIcon && <InputSlot alignItems="center" width={"10%"}>{iconElement}</InputSlot>}
-        <InputField
-          defaultValue={defaultValue}
-          placeholder={placeHolder}
-          onChangeText={handleChange}
-          value={fieldInput === "numeric" ? formatThousand(value ?? "") : value}
-          keyboardType={fieldInput}
-          onFocus={onFocus}
-          showSoftInputOnFocus={softOnFocus}
-          testID={testID}
-          autoFocus={autoFocus}
-        />
-      </Input>
+      <Pressable onPress={onFocus}>
+        <Input isReadOnly={readonly} variant={variant} size={size} borderRadius={10} isDisabled={isDisabled} borderColor={borderColor} backgroundColor={bgColor}>
+          {showIcon && <InputSlot alignItems="center" width={"10%"}>{iconElement}</InputSlot>}
+          <InputField
+            defaultValue={defaultValue}
+            placeholder={placeHolder}
+            onChangeText={handleChange}
+            value={fieldInput === "numeric" ? formatThousand(value ?? "") : value}
+            keyboardType={fieldInput}
+            showSoftInputOnFocus={softOnFocus}
+            testID={testID}
+            autoFocus={autoFocus}
+          />
+        </Input>
+      </Pressable>
 
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />

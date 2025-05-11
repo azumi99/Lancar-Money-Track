@@ -24,12 +24,16 @@ import { Swipeable } from "react-native-gesture-handler";
 import Octicons from "react-native-vector-icons/Octicons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { DeleteConfirm } from "@components/modalConfirm/deleteConfirm";
+import { useCurrency } from "@config/store";
+import { playBeep } from "@utils/soundUtils";
 
 const DetailCalendar = ({ route }) => {
     const navigation = useNavigation<any>();
     const [data, setData] = useState<InterfaceCatatan[]>([]);
     const [showAlertDialog, setShowAlertDialog] = React.useState(false)
     const [idToDelete, setIdToDelete] = useState<number>(0);
+    const { currency } = useCurrency();
+    const defaultCurrency = currency.find((item) => item.is_default);
 
     const fetchData = async () => {
         try {
@@ -61,7 +65,7 @@ const DetailCalendar = ({ route }) => {
 
     const renderRightActions = (item) => (
         <HStack alignItems="center" ml={10}>
-            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: item } })}>
+            <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: item } }) }}>
                 <Box
                     py="$4"
                     bgColor="$amber400"
@@ -72,7 +76,7 @@ const DetailCalendar = ({ route }) => {
                     <Text color="white">Edit</Text>
                 </Box>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setIdToDelete(item.id); setShowAlertDialog(true); }}>
+            <TouchableOpacity onPress={() => { playBeep(); setIdToDelete(item.id); setShowAlertDialog(true); }}>
                 <Box
                     py="$4"
                     bgColor="$rose400"
@@ -117,15 +121,18 @@ const DetailCalendar = ({ route }) => {
                                         ? -item.jumlah
                                         : item.jumlah
                                     : 0;
+                                const currencyData = currency.find((val) => val.short_code === item.matauang);
 
                                 return (
                                     <Swipeable renderRightActions={() => renderRightActions(item)}>
                                         <TouchableOpacity
-                                            onPress={() =>
+                                            onPress={() => {
+                                                playBeep();
                                                 navigation.navigate("StackNav", {
                                                     screen: "CatatanDetail",
                                                     params: { data: item, back: true },
                                                 })
+                                            }
                                             }
                                         >
                                             <Box
@@ -164,7 +171,10 @@ const DetailCalendar = ({ route }) => {
                                                         ) : null}
                                                         <Text>{truncatedCatatan}</Text>
                                                     </HStack>
-                                                    <CurrencyFormatter amount={amount} currency="IDR" />
+                                                    <VStack alignItems="flex-end">
+                                                        <Text size="sm"> {formatThousand(amount)}</Text>
+                                                        {defaultCurrency?.short_code !== item.matauang && <Text italic size="xs">({defaultCurrency?.short_code} {formatThousand((amount / (currencyData?.value_convert || 1)).toLocaleString("id-ID", { maximumFractionDigits: 2 }))})</Text>}
+                                                    </VStack>
                                                 </HStack>
                                             </Box>
                                         </TouchableOpacity>
@@ -181,21 +191,19 @@ const DetailCalendar = ({ route }) => {
                 </VStack>
             }
 
-
-
-
             <DeleteConfirm showAlertDialog={showAlertDialog} setShowAlertDialog={setShowAlertDialog} title={"Apakah anda yakin akan menghapus?"} actionConfirm={actionConfirm} />
-
 
             <Fab
                 size="lg"
                 placement="bottom right"
                 bgColor="$yellow500"
-                onPress={() =>
+                onPress={() => {
+                    playBeep();
                     navigation.navigate("StackNav", {
                         screen: "AddScreen",
                         params: { name: true },
                     })
+                }
                 }
             >
                 <FabIcon as={AddIcon} />

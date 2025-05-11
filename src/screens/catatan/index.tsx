@@ -1,10 +1,10 @@
 import { IconCustom } from "@components/iconCustom"
 import SafeAreaCustom from "@components/safeArea"
-import { Box, Button, ButtonText, Divider, HStack, ScrollView, Text, View, VStack } from "@gluestack-ui/themed"
+import { Box, Button, ButtonText, Divider, GlobeIcon, HStack, Icon, Menu, MenuItem, MenuItemLabel, RefreshControl, ScrollView, Text, View, VStack } from "@gluestack-ui/themed"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import React, { useCallback, useRef, useState } from "react"
 import { TextHeading } from "@components/textHeading"
-import { TouchableOpacity, FlatList } from "react-native"
+import { TouchableOpacity, FlatList, Dimensions } from "react-native"
 import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native"
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -15,8 +15,9 @@ import moment from "moment"
 import { GetCatatan, handleDelete, InterfaceCatatan } from "@screens/catatan/models/crudCatatan"
 import { Swipeable } from "react-native-gesture-handler"
 import { formatThousand } from "@components/formatRibuan"
-import { useRekeningData } from "@config/store"
+import { useCurrency, useRekeningData } from "@config/store"
 import { DeleteConfirm } from "@components/modalConfirm/deleteConfirm"
+import { playBeep } from "@utils/soundUtils"
 
 export const getIconLibrary = (library: string) => {
     switch (library) {
@@ -37,12 +38,16 @@ export const getIconLibrary = (library: string) => {
 const CatatanScreen = () => {
     const isFocused = useIsFocused();
     const navigation = useNavigation<any>();
+    const { width } = Dimensions.get('window');
     const [data, setData] = useState<InterfaceCatatan[]>([]);
     const [date, setDate] = useState(new Date());
     const [showModal, setShowModal] = useState(false)
     const { rekening } = useRekeningData();
     const [showAlertDialog, setShowAlertDialog] = React.useState(false)
     const [idToDelete, setIdToDelete] = useState<number>(0);
+    const { currency } = useCurrency();
+    const [refreshing, setRefreshing] = useState(false)
+    const defaultCurrency = currency.find((item) => item.is_default);
 
 
     const year = date.getFullYear();
@@ -121,6 +126,7 @@ const CatatanScreen = () => {
     const swipeRefs = useRef<{ [key: string]: Swipeable | null }>({});
     const fetchData = async () => {
         try {
+            setRefreshing(true)
             const response = await GetCatatan();
             setData(response);
             Object.values(swipeRefs.current).forEach(ref => {
@@ -128,8 +134,10 @@ const CatatanScreen = () => {
                     ref.close();
                 }
             });
+            setRefreshing(false)
         } catch (error) {
             console.error('Error:', error);
+            setRefreshing(false)
         }
     };
     const actionConfirm = async () => {
@@ -148,12 +156,12 @@ const CatatanScreen = () => {
 
     const renderRightActions = (item) => (
         <HStack alignItems="center" ml={10}>
-            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: item } })}>
+            <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: item } }) }}>
                 <Box py="100%" bgColor="$amber400" justifyContent="center" alignItems="center" width={70} >
                     <Text color="white">Edit</Text>
                 </Box>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setIdToDelete(item.id); setShowAlertDialog(true); }} >
+            <TouchableOpacity onPress={() => { playBeep(); setIdToDelete(item.id); setShowAlertDialog(true); }} >
                 <Box py="100%" bgColor="$rose400" justifyContent="center" alignItems="center" width={70} >
                     <Text color="white">Hapus</Text>
                 </Box>
@@ -169,22 +177,91 @@ const CatatanScreen = () => {
                 <View paddingVertical={10}>
                     <VStack space="md">
                         <HStack justifyContent="space-between">
-                            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'SearchMainScreen' })}>
-                                <IconCustom As={Ionicons} size={25} name="search" />
-                            </TouchableOpacity>
-                            <TextHeading style={{ color: 'black' }}>Pengelola Keuangan</TextHeading>
-                            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'CalendarScreen' })}>
-                                <IconCustom As={Ionicons} size={25} name="calendar-outline" />
-                            </TouchableOpacity>
+                            <HStack width={"20%"}>
+                                <Menu
+                                    width={width}
+                                    paddingHorizontal={10}
+                                    placement="bottom"
+                                    trigger={({ ...triggerProps }) => {
+                                        return (
+                                            <TouchableOpacity {...triggerProps} >
+                                                <IconCustom As={Ionicons} size={25} name="list" />
+                                            </TouchableOpacity>
+                                        )
+                                    }}
+                                >
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'ReminderScreen' })} key="Pengingat" textValue="Pengingat">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="notifications-outline" size={20} />
+                                            <MenuItemLabel size="sm">Pengingat</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'AnggaranScreen' })} key="Anggaran" textValue="Anggaran">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="wallet-outline" size={20} />
+                                            <MenuItemLabel size="sm">Anggaran</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'PembayaranScreen' })} key="Pembayaran" textValue="Pembayaran">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="card-outline" size={20} />
+                                            <MenuItemLabel size="sm">Pembayaran</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'WaktuLaporanScreen' })} key="TanggalMulaiBulanan" textValue="Tanggal Mulai Bulanan">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="calendar-outline" size={20} />
+                                            <MenuItemLabel size="sm">Tanggal Mulai Bulanan</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'ResetCacheScreen' })} key="HapusSemuaData" textValue="Hapus semua Data">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="trash-outline" size={20} />
+                                            <MenuItemLabel size="sm">Hapus Cache</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'EksporScreen' })} key="EksportData" textValue="Eksport Data">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="download-outline" size={20} />
+                                            <MenuItemLabel size="sm">Eksport Data</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                    <MenuItem onPress={() => navigation.navigate('StackNav', { screen: 'BackupScreen' })} key="Backup" textValue="Backup">
+                                        <HStack space="lg">
+                                            <IconCustom color="#eab308" As={Ionicons} name="cloud-upload-outline" size={20} />
+                                            <MenuItemLabel size="sm">Backup</MenuItemLabel>
+                                        </HStack>
+                                    </MenuItem>
+
+                                </Menu>
+
+                            </HStack>
+                            <TextHeading style={{ color: 'black', textAlign: 'center' }}>Pengelola Keuangan</TextHeading>
+                            <HStack alignItems="center" space="lg" width={"20%"}>
+                                <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'SearchMainScreen' }) }}>
+                                    <IconCustom As={Ionicons} size={25} name="search" />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'CalendarScreen' }) }}>
+                                    <IconCustom As={Ionicons} size={25} name="calendar-outline" />
+                                </TouchableOpacity>
+                            </HStack>
+
                         </HStack>
                         <VStack>
                             <HStack>
                                 <HStack space="md">
-                                    <TouchableOpacity onPress={() => setShowModal(true)}>
+                                    <TouchableOpacity onPress={() => { playBeep(); setShowModal(true) }}>
                                         <VStack>
-                                            <TextHeading>{year}</TextHeading>
+                                            <Text size="sm">{year}</Text>
                                             <HStack alignItems="center">
-                                                <TextHeading style={{ color: 'black', fontSize: 25 }}>{shortMonth}</TextHeading>
+                                                <Text style={{ color: 'black', fontSize: 25 }}>{shortMonth}</Text>
                                                 <IconCustom As={Ionicons} size={20} name="chevron-down-outline" />
                                             </HStack>
                                         </VStack>
@@ -192,15 +269,15 @@ const CatatanScreen = () => {
                                     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: '20%' }}>
                                         <HStack space="md">
                                             <VStack space="sm" >
-                                                <TextHeading>Pengeluaran</TextHeading>
+                                                <Text size="sm">Pengeluaran</Text>
                                                 <Text color="black" size={'lg'}>{formatThousand(totalPengeluaran)}</Text>
                                             </VStack>
                                             <VStack space="sm">
-                                                <TextHeading>Pemasukan</TextHeading>
+                                                <Text size="sm">Pemasukan</Text>
                                                 <Text color="black" size={'lg'}> {formatThousand(totalPemasukan)}</Text>
                                             </VStack>
                                             <VStack space="sm">
-                                                <TextHeading>Saldo</TextHeading>
+                                                <Text size="sm">Saldo</Text>
                                                 <Text color="black" size={'lg'}>{formatThousand(saldo)}</Text>
                                             </VStack>
                                         </HStack>
@@ -244,6 +321,12 @@ const CatatanScreen = () => {
                     <FlatList
                         data={filterDataByDate()}
                         showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={fetchData}
+                            />
+                        }
                         keyExtractor={(item) => item.tanggal}
                         renderItem={({ item }) => (
                             <Box mb="$4">
@@ -256,7 +339,7 @@ const CatatanScreen = () => {
                                         })}
                                     </TextHeading>
 
-                                    <HStack alignItems="center" space="md" maxWidth={'40%'}>
+                                    <HStack alignItems="center" space="md" >
                                         {item.totalPlus > 0 && <TextHeading size="xs">+: {formatThousand(item.totalPlus)}</TextHeading>}
                                         {item.totalMinus > 0 && <TextHeading size="xs">-: {formatThousand(item.totalMinus)}</TextHeading>}
                                     </HStack>
@@ -273,7 +356,7 @@ const CatatanScreen = () => {
                                         : itemData.catatan;
                                     const rekeningFrom = rekening.find((rek) => rek.key === itemData.id_rekening);
                                     const rekeningTo = rekening.find((rek) => rek.key === itemData.id_rekening_tf);
-
+                                    const currencyData = currency.find((item) => item.short_code === itemData.matauang);
 
 
                                     const amount = itemData.jumlah !== undefined && itemData.jumlah !== null
@@ -290,7 +373,7 @@ const CatatanScreen = () => {
                                             }}
                                             renderRightActions={() => renderRightActions(itemData)}
                                         >
-                                            <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'CatatanDetail', params: { data: itemData } })}>
+                                            <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'CatatanDetail', params: { data: itemData } }) }}>
                                                 <Box
                                                     borderBottomWidth={0.1}
                                                     borderColor="$trueGray400"
@@ -308,7 +391,7 @@ const CatatanScreen = () => {
                                                                         name={itemData.kategoriIcon}
                                                                         size={15} />
 
-                                                                    {JSON.parse(itemData.image).length > 0 &&
+                                                                    {JSON.parse(itemData?.image).length > 0 &&
                                                                         <View padding={4} bgColor="$blue200" borderRadius={'$full'} position="absolute" >
                                                                             <IconCustom
                                                                                 As={Ionicons}
@@ -363,7 +446,10 @@ const CatatanScreen = () => {
                                                             </Text>
 
                                                         </HStack>
-                                                        <Text size="sm">{formatThousand(amount)}</Text>
+                                                        <VStack alignItems="flex-end">
+                                                            <Text size="sm"> {formatThousand(amount)}</Text>
+                                                            {defaultCurrency?.short_code !== itemData.matauang && <Text italic size="xs">({defaultCurrency?.short_code} {formatThousand((amount / (currencyData?.value_convert || 1)).toLocaleString("id-ID", { maximumFractionDigits: 2 }))})</Text>}
+                                                        </VStack>
                                                     </HStack>
                                                 </Box>
                                             </TouchableOpacity>

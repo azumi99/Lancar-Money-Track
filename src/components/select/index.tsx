@@ -16,6 +16,7 @@ import {
   SelectDragIndicator,
   SelectItem,
   View,
+  ActionsheetScrollView,
 } from '@gluestack-ui/themed';
 import dataInterface from './interface';
 import { DimensionValue } from 'react-native';
@@ -78,9 +79,11 @@ const SelectComponent: React.FC<Props> = ({
               <SelectDragIndicatorWrapper>
                 <SelectDragIndicator />
               </SelectDragIndicatorWrapper>
-              {data?.map((item, index) => (
-                <SelectItem key={index} label={item.label} value={item.value} />
-              ))}
+              <ActionsheetScrollView showsVerticalScrollIndicator={false}>
+                {data?.map((item, index) => (
+                  <SelectItem key={index} label={item.label} value={item.value} />
+                ))}
+              </ActionsheetScrollView>
             </SelectContent>
           </SelectPortal>
         )}

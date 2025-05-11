@@ -7,16 +7,19 @@ import { NavigationContainer } from '@react-navigation/native';
 import { CreateTableKategori } from '@screens/profile/detailPengaturan/pengaturanKategori/modelKategori';
 import { CreateTableCatatan } from '@screens/catatan/models/crudCatatan';
 import { CreateTableRekening } from '@screens/profile/detailPengaturan/pengaturanRekening/modelRekening';
+import { useCurrency, useKategoriStorePemasukan } from '@config/store';
+import { fetchPemasukan, fetchPengeluaran } from '@screens/profile/detailPengaturan/pengaturanKategori/globalGetFunctionKategori';
+import { initialize } from '@screens/profile/detailPengaturan/pengaturanCurrency/utils';
+import { CurrencyItemInterface } from '@screens/profile/detailPengaturan/pengaturanCurrency/currencyScreen';
+import { initSound } from '@utils/soundUtils';
+
 
 
 const NavigatorScreen = () => {
   const Stack = createStackNavigator();
 
-  useEffect(() => {
-    CreateTableKategori();
-    CreateTableCatatan();
-    CreateTableRekening();
-  }, [])
+
+
 
   return (
     <NavigationContainer>

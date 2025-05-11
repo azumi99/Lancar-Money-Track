@@ -8,12 +8,14 @@ import { CurrencyFormatter } from "@components/curencyComponent"
 import { TouchableOpacity } from "react-native"
 import { ModalCustom } from "@components/modalComponent"
 import { DeleteConfirm } from "@components/modalConfirm/deleteConfirm"
-import { useKategoriStorePemasukan, useRekeningData } from "@config/store"
+import { useCurrency, useKategoriStorePemasukan, useRekeningData } from "@config/store"
 import { GetKategoriByKey, KategoriInterface } from "@screens/profile/detailPengaturan/pengaturanKategori/modelKategori"
 import { handleDelete } from "../models/crudCatatan"
 import { useNavigation } from "@react-navigation/native"
 import { chunk } from 'lodash';
 import Ionicons from "react-native-vector-icons/Ionicons"
+import { formatThousand } from "@components/formatRibuan"
+import { playBeep } from "@utils/soundUtils"
 
 const CatatanDetail = ({ route }) => {
     const [showAlertDialog, setShowAlertDialog] = React.useState(false)
@@ -21,6 +23,7 @@ const CatatanDetail = ({ route }) => {
     const [kategori, setKategori] = useState<KategoriInterface | null>()
     const [kategoriIcon, setKategoriIcon] = useState(null)
     const { rekening } = useRekeningData();
+    const { currency } = useCurrency();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,8 +42,10 @@ const CatatanDetail = ({ route }) => {
     const rekeningFrom = rekening.find((rek) => rek.key === route.params.data.id_rekening);
     const rekeningTo = rekening.find((rek) => rek.key === route.params.data.id_rekening_tf);
     console.log('imageArray', imageArray)
+    const currencyData = currency.find((item) => item.short_code === route.params.data.matauang);
+    const defaultCurrency = currency.find((item) => item.is_default);
 
-    console.log('route', route.params.data)
+    console.log('route', currencyData)
     return (
         <SafeAreaCustom>
             <ScrollView paddingHorizontal={16} marginVertical={20} showsVerticalScrollIndicator={false}>
@@ -68,6 +73,7 @@ const CatatanDetail = ({ route }) => {
                     <HStack space="4xl" alignItems="center">
                         <VStack space="4xl">
                             <TextHeading>Jenis</TextHeading>
+                            <TextHeading>Matauang</TextHeading>
                             <TextHeading>Jumlah</TextHeading>
                             <TextHeading>Rekening</TextHeading>
                             <TextHeading>Tanggal</TextHeading>
@@ -78,10 +84,8 @@ const CatatanDetail = ({ route }) => {
                             <Box bgColor="$yellow300" paddingHorizontal={5} borderRadius={10}>
                                 <Text>{route.params.data.jenis}</Text>
                             </Box>
-                            <CurrencyFormatter
-                                amount={amount}
-                                currency="IDR"
-                            />
+                            <Text>{route.params.data.matauang}</Text>
+                            <Text>{formatThousand(amount)} {defaultCurrency?.short_code !== route.params.data.matauang && <Text italic size="xs">({defaultCurrency?.short_code} {formatThousand((amount / (currencyData?.value_convert || 1)).toLocaleString("id-ID", { maximumFractionDigits: 2 }))})</Text>}</Text>
                             {route.params.data.jenis === "transfer" ?
                                 <Text>{`${rekeningFrom?.name} 💸 ${rekeningTo?.name}`}</Text> : <Text>{`${rekeningFrom?.name}`}</Text>}
                             <Text>{route.params.data.tanggal}</Text>
@@ -114,13 +118,13 @@ const CatatanDetail = ({ route }) => {
             <View>
                 <Divider my="$0.5" />
                 <HStack justifyContent="space-around" paddingHorizontal={16} alignItems="center">
-                    <TouchableOpacity onPress={() => navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: route.params.data } })}>
+                    <TouchableOpacity onPress={() => { playBeep(); navigation.navigate('StackNav', { screen: 'AddScreen', params: { data: route.params.data } }) }}>
                         <View paddingVertical={16} paddingHorizontal={16} alignItems="center">
                             <TextHeading>Edit</TextHeading>
                         </View>
                     </TouchableOpacity>
                     <Divider my="$0.5" orientation="vertical" h={15} />
-                    <TouchableOpacity onPress={() => setShowAlertDialog(true)}>
+                    <TouchableOpacity onPress={() => { playBeep(); setShowAlertDialog(true) }}>
                         <View paddingVertical={16} paddingHorizontal={16} alignItems="center">
                             <TextHeading>Hapus</TextHeading>
                         </View>
